@@ -1,5 +1,5 @@
 # Template resources for custom cards
-This repository contains the building blocks for the template resources in use for the next version of MTG.Design, an online website for creating custom *Magic: The Gathering cards.*
+This repository contains the building blocks for the template resources in use for the next version of MTG.Design, an online website for creating custom *Magic: The Gathering* cards.
 
 Whenever possible, everything is designed to be vectorized to ensure the highest quality, with the exception of most background textures. When adding content, priority should always be given to SVG images.
 
