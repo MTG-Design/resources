@@ -7,26 +7,13 @@
   $iniList = array(
     'regular','regular_R',
 		'regular_creature','regular_creature_R',
+		'regular_creature_multicolor','regular_creature_multicolor_R',
 		'regular_land','regular_land_R',
 		'regular_multicolor','regular_multicolor_R',
 		'regular_vehicle','regular_vehicle_R',
 		'regular_vehicle_multicolor','regular_vehicle_multicolor_R',
-		'regular_creature_multicolor','regular_creature_multicolor_R',
-		'token_medium',
-		'regular_creature_legendary_multicolor','regular_creature_legendary_multicolor_R',
-		'regular_legendary_multicolor','regular_legendary_multicolor_R',
-		'regular_legendary','regular_legendary_R',
-		'regular_creature_legendary','regular_creature_legendary_R',
-    'regular_land_legendary','regular_land_legendary_R',
-		'regular_vehicle_legendary','regular_vehicle_legendary_R',
-		'regular_vehicle_legendary_multicolor','regular_vehicle_legendary_multicolor_R',
-    'regular_planeswalker_R','regular_planeswalker'
   );
-  
-  $iniList = array('regular_vehicle','regular_vehicle_R',
-		'regular_vehicle_multicolor','regular_vehicle_multicolor_R');
-  //$iniList = array('regular','regular_R', 'regular_creature', 'regular_creature_R', 'regular_creature_multicolor', 'regular_creature_multicolor_R');
-    
+      
   foreach($iniList as $inikey) {
     foreach (array('A','W','U','B','R','G','M','C','WU','WB','UB','UR','BR','BG','RG','RW','GW','GU') as $colorkey) {
       if ((strpos($inikey, 'multicolor') !== false) && (strlen($colorkey) == 1)) {
