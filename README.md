@@ -20,6 +20,6 @@ You can donate to MTG.Design using [Patreon](https://www.patreon.com/mtgdotdesig
 ## About
 MTG.Design was created using the MIT license by [ancestral](https://github.com/ancestral) of Spellshapers, LLC.
 
-Images in `/background` may contain trademarks and be copyright of Wizards of the Coast, LLC, a subsidiary of Hasbro, Inc.
+Images in `/background` and `/stamp` may contain trademarks and be copyright of Wizards of the Coast, LLC, a subsidiary of Hasbro, Inc.
 
 MTG.Design is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC.
