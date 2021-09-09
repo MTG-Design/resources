@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 657 60">
+  <linearGradient id="titlebara" gradientTransform="matrix(0 -56 56 0 689.183 107)" gradientUnits="userSpaceOnUse" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0" stop-color="#c7cfdf" stop-opacity=".75"/>
+    <stop offset="1" stop-color="#474f5f" stop-opacity=".75"/>
+  </linearGradient>
+  <linearGradient id="titlebarb" gradientTransform="matrix(0 -56 56 0 55 107)" gradientUnits="userSpaceOnUse" x1="0" x2="1" y1="0" y2="0">
+    <stop offset="0" stop-color="#474f5f" stop-opacity=".75"/>
+    <stop offset=".25" stop-color="#c7cfdf" stop-opacity=".75"/>
+    <stop offset="1" stop-color="#e7efef" stop-opacity=".75"/>
+  </linearGradient>
+  <radialGradient id="tokentitle" cx="0" cy="0" gradientTransform="matrix(326.5 0 0 40 328.5 30)" gradientUnits="userSpaceOnUse" r="1">
+    <stop offset=".25" stop-opacity=".75" stop-color="#3f3f4f"/>
+    <stop offset=".75" stop-opacity=".375" stop-color="#3f3f4f"/>
+    <stop offset=".8125" stop-opacity=".25" stop-color="#3f3f4f"/>
+    <stop offset="1" stop-opacity=".125" stop-color="#3f3f4f"/>
+  </radialGradient>
+  <path d="m646 2h-635c-1.538 1.857-9 11.665-9 28s7.462 26.143 9 28h635c1.541-1.852 9.038-11.662 9-28-.038-16.334-7.466-26.14-9-28z" fill="#c7cfdf" fill-opacity=".875"/>
+  <path d="m646 2h-635c-1.538 1.857-9 11.665-9 28s7.462 26.143 9 28h635c1.541-1.852 9.038-11.662 9-28-.038-16.334-7.466-26.14-9-28z" fill="url(#tokentitle)"/>
+  <path d="m56 57h631c8.368 12.302 8.421 33.718 0 46l2 5c12.289-14.767 12.198-41.209 0-56h-635z" fill="url(#titlebara)" transform="matrix(-1 0 0 -1 700 110)"/>
+  <path d="m57 55h631c8.368 12.302 8.421 33.718 0 46l2 5c12.289-14.767 12.198-41.209 0-56h-635z" fill="url(#titlebarb)" transform="translate(-44 -48)"/>
+  <path d="m10 0s-10 10.89-10 30 10 30 10 30h637s10.044-10.887 10-30c-.044-19.108-10-30-10-30zm636 2h-635c-1.538 1.857-9 11.665-9 28s7.462 26.143 9 28h635c1.541-1.852 9.038-11.662 9-28-.038-16.334-7.466-26.14-9-28z"/>
+</svg>

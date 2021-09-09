@@ -8,7 +8,7 @@ Resources are split into individual components, the recipes how how to build the
 Currently, the components and recipes are included, with the rendering instructions to be included at a later date.
 
 ## How to use
-`build.php` builds the `.ini` recipe files into SVG or PNG images. (To export directly to PNG, `svgexport` is required.)
+`build.php` builds the `.ini` recipe files into SVG or PNG images. (To export to PNG, an application like `inkscape` or `svgexport` is required. Be warned that not all graphics applications fully implement the SVG 1.1 specification.)
 
 You can add new types of card by creating a new recipe file. (Guidance and help on how to write recipe files will be added in the future.)
 
@@ -19,5 +19,7 @@ You can donate to MTG.Design using [Patreon](https://www.patreon.com/mtgdotdesig
 
 ## About
 MTG.Design was created using the MIT license by [ancestral](https://github.com/ancestral) of Spellshapers, LLC.
+
+Images in `/background` may contain trademarks and be copyright of Wizards of the Coast, LLC, a subsidiary of Hasbro, Inc.
 
 MTG.Design is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC.
