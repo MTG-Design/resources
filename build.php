@@ -7,11 +7,23 @@
   $iniList = array(
     'regular','regular_R',
 		'regular_creature','regular_creature_R',
-		'regular_creature_multicolor','regular_creature_multicolor_R',
 		'regular_land','regular_land_R',
 		'regular_multicolor','regular_multicolor_R',
 		'regular_vehicle','regular_vehicle_R',
 		'regular_vehicle_multicolor','regular_vehicle_multicolor_R',
+		'regular_creature_multicolor','regular_creature_multicolor_R',
+		'token_large','token_large_R',
+		'token_medium','token_medium_R',
+		'regular_creature_legendary_multicolor','regular_creature_legendary_multicolor_R',
+		'regular_legendary_multicolor','regular_legendary_multicolor_R',
+		'regular_legendary','regular_legendary_R',
+		'regular_creature_legendary','regular_creature_legendary_R',
+    'regular_land_legendary','regular_land_legendary_R',
+		'regular_vehicle_legendary','regular_vehicle_legendary_R',
+		'regular_vehicle_legendary_multicolor','regular_vehicle_legendary_multicolor_R',
+    'regular_planeswalker_R','regular_planeswalker',
+    'regular_planeswalker4_R','regular_planeswalker4',
+    'regular_planeswalker5_R','regular_planeswalker5'
   );
       
   foreach($iniList as $inikey) {
@@ -33,6 +45,13 @@
           'width' => 'auto',
           'height' => 'auto',
           'index' => 10,
+        ),
+        'background2' => array(
+          'x' => 0,
+          'y' => 0,
+          'width' => 'auto',
+          'height' => 'auto',
+          'index' => 20,
         ),
         'textbackground' => array(
           'x' => 0,
@@ -225,22 +244,24 @@
           
               if ($section['filter'] == 'feDropShadow') {
                 $defs_filter .= "
-                  <filter id=\"$key\" x=\"-100%\" y=\"-100%\" width=\"250%\" height=\"250%\">
-                    <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"{$section['stdDeviation']}\"/>
-              			<feOffset dx=\"{$section['dx']}\" dy=\"{$section['dy']}\" result=\"offsetblur\"/>
-              			<feFlood flood-color=\"{$section['flood-color']}\" flood-opacity=\"{$section['flood-opacity']}\"/>
-              			<feComposite in2=\"offsetblur\" operator=\"in\"/>
-              			<feMerge>
-              				<feMergeNode/>
-              				<feMergeNode in=\"SourceGraphic\"/>
-              			</feMerge>
-                  </filter>";
-               } else if ($section['filter'] == 'feGaussianBlur') {
-          
-          
-              $defs_filter .= "
                 <filter id=\"$key\" x=\"-100%\" y=\"-100%\" width=\"250%\" height=\"250%\">
                   <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"{$section['stdDeviation']}\"/>
+            			<feOffset dx=\"{$section['dx']}\" dy=\"{$section['dy']}\" result=\"offsetblur\"/>
+            			<feFlood flood-color=\"{$section['flood-color']}\" flood-opacity=\"{$section['flood-opacity']}\"/>
+            			<feComposite in2=\"offsetblur\" operator=\"in\"/>
+            			<feMerge>
+            				<feMergeNode/>
+            				<feMergeNode in=\"SourceGraphic\"/>
+            			</feMerge>
+                </filter>";
+              } else if ($section['filter'] == 'feGaussianBlur') {
+                $defs_filter .= "
+                <filter id=\"$key\" x=\"-100%\" y=\"-100%\" width=\"250%\" height=\"250%\">
+                  <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"{$section['stdDeviation']}\" result=\"$key\"/>
+            			<feMerge>
+            				<feMergeNode/>
+            				<feMergeNode in=\"$key\"/>
+            			</feMerge>
                 </filter>";
               }
         
