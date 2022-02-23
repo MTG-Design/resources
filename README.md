@@ -9,8 +9,15 @@ Currently, the components and recipes are included.
 
 Some rendering support has been enabled, but it is unfinished.
 
+## Requirements
+* PHP 8.1 or newer
+* XeLaTeX, with several packages installed
+* Inkscape, in order to save SVGs to a differnet format (like PNG or PDF)
+
 ## How to use
 `build.php` builds the `.ini` recipe files into SVG or PNG images. (To export to PNG, `inkscape` is recommended for proper SVG export. (Not all graphics applications fully implement the SVG 1.1 specification.)
+
+When cards are built, they will save to `/cards` by default.
 
 `render.php` renders the text using XeLaTeX. You must install it on your system if you want to render text on cards.
 
@@ -23,6 +30,8 @@ Formats:
   -n	Start rendering at card number
   -s	Scryfall JSON format
 ```
+
+When cards are rendered, they will save to `/output` by default.
 
 The following LaTeX packages are required:
 
