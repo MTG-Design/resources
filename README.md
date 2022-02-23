@@ -5,12 +5,43 @@ Whenever possible, everything is designed to be vectorized to ensure the highest
 
 Resources are split into individual components, the recipes how how to build the cards, and the PHP and LaTeX rendering files. Components include items such as accents, backgrounds, boxes, borders, and shadows. Recipes indicate which components to use, what effects to apply, and where to place them on a card. Rendering files composite the graphics with LaTeX text.
 
-Currently, the components and recipes are included, with the rendering instructions to be included at a later date.
+Currently, the components and recipes are included.
+
+Some rendering support has been enabled, but it is unfinished.
 
 ## How to use
-`build.php` builds the `.ini` recipe files into SVG or PNG images. (To export to PNG, an application like `inkscape` or `svgexport` is required. Be warned that not all graphics applications fully implement the SVG 1.1 specification.)
+`build.php` builds the `.ini` recipe files into SVG or PNG images. (To export to PNG, `inkscape` is recommended for proper SVG export. (Not all graphics applications fully implement the SVG 1.1 specification.)
 
-You can add new types of card by creating a new recipe file. (Guidance and help on how to write recipe files will be added in the future.)
+`render.php` renders the text using XeLaTeX. You must install it on your system if you want to render text on cards.
+
+```
+usage: render.php <format> <path>
+
+Formats:
+  -l	LackeyBot JSON format
+  -m	MTGJSON JSON format
+  -n	Start rendering at card number
+  -s	Scryfall JSON format
+```
+
+The following LaTeX packages are required:
+
+```
+  textpos
+  calc
+  xcolor
+  fontspec
+  lmodern
+  hyphenat
+  enumitem
+  graphicx
+  setspace
+```
+
+`/frames` includes the `.ini` recipes for how to draw the card, and where.
+`/typesetting` includes the text `.ini` recipes for how to set the type, and where to place it.
+
+You can add new types of cards by creating a new recipe file. (Guidance and help on how to write recipe files will be added in the future.)
 
 ## Contribute
 MTG.Design is being actively worked on, with frames being uploaded only when they are considered ready. If you have components or recipes to add, please file a pull request and they will be reviewed.
@@ -20,6 +51,6 @@ You can donate to MTG.Design using [Patreon](https://www.patreon.com/mtgdotdesig
 ## About
 MTG.Design was created using the MIT license by [ancestral](https://github.com/ancestral) of Spellshapers, LLC.
 
-Images in `/background` and `/stamp` may contain trademarks and be copyright of Wizards of the Coast, LLC, a subsidiary of Hasbro, Inc.
+Images in `/background`, `/title`, `/typeline` and `/stamp` may contain trademarks and be copyright of Wizards of the Coast, LLC, a subsidiary of Hasbro, Inc.
 
 MTG.Design is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC.

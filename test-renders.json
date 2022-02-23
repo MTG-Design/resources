@@ -1,0 +1,246 @@
+[
+  {
+    "object": "card",
+    "id": "090f5ad6-e10e-49b3-8643-51a4e792517c",
+    "oracle_id": "4e3c3bdc-667d-42ec-b960-159a39c53cb3",
+    "multiverse_ids": [
+      26382
+    ],
+    "mtgo_id": 15057,
+    "mtgo_foil_id": 15058,
+    "tcgplayer_id": 7767,
+    "cardmarket_id": 3256,
+    "name": "Aura Blast",
+    "lang": "en",
+    "released_at": "2001-02-05",
+    "uri": "https://api.scryfall.com/cards/090f5ad6-e10e-49b3-8643-51a4e792517c",
+    "scryfall_uri": "https://scryfall.com/card/pls/1/aura-blast?utm_source=api",
+    "layout": "normal",
+    "highres_image": true,
+    "image_status": "highres_scan",
+    "image_uris": {
+      "small": "https://c1.scryfall.com/file/scryfall-cards/small/front/0/9/090f5ad6-e10e-49b3-8643-51a4e792517c.jpg?1562896922",
+      "normal": "https://c1.scryfall.com/file/scryfall-cards/normal/front/0/9/090f5ad6-e10e-49b3-8643-51a4e792517c.jpg?1562896922",
+      "large": "https://c1.scryfall.com/file/scryfall-cards/large/front/0/9/090f5ad6-e10e-49b3-8643-51a4e792517c.jpg?1562896922",
+      "png": "https://c1.scryfall.com/file/scryfall-cards/png/front/0/9/090f5ad6-e10e-49b3-8643-51a4e792517c.png?1562896922",
+      "art_crop": "https://cdnb.artstation.com/p/assets/images/images/008/942/025/4k/beto-lima-img-1231-postar.jpg?1516218688",
+      "border_crop": "https://c1.scryfall.com/file/scryfall-cards/border_crop/front/0/9/090f5ad6-e10e-49b3-8643-51a4e792517c.jpg?1562896922"
+    },
+    "mana_cost": "{1}{W}",
+    "cmc": 2.0,
+    "type_line": "Instant",
+    "oracle_text": "Destroy target enchantment.\nDraw a card.",
+    "colors": [
+      "W"
+    ],
+    "color_identity": [
+      "W"
+    ],
+    "keywords": [
+
+    ],
+    "legalities": {
+      "standard": "not_legal",
+      "future": "not_legal",
+      "historic": "not_legal",
+      "gladiator": "not_legal",
+      "pioneer": "not_legal",
+      "modern": "not_legal",
+      "legacy": "legal",
+      "pauper": "legal",
+      "vintage": "legal",
+      "penny": "not_legal",
+      "commander": "legal",
+      "brawl": "not_legal",
+      "historicbrawl": "not_legal",
+      "paupercommander": "legal",
+      "duel": "legal",
+      "oldschool": "not_legal",
+      "premodern": "legal"
+    },
+    "games": [
+      "paper",
+      "mtgo"
+    ],
+    "reserved": false,
+    "foil": true,
+    "nonfoil": true,
+    "finishes": [
+      "nonfoil",
+      "foil"
+    ],
+    "oversized": false,
+    "promo": false,
+    "reprint": false,
+    "variation": false,
+    "set_id": "82dc193b-bd5f-4883-a93f-a4155b467ee0",
+    "set": "pls",
+    "set_name": "Planeshift",
+    "set_type": "expansion",
+    "set_uri": "https://api.scryfall.com/sets/82dc193b-bd5f-4883-a93f-a4155b467ee0",
+    "set_search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Apls&unique=prints",
+    "scryfall_set_uri": "https://scryfall.com/sets/pls?utm_source=api",
+    "rulings_uri": "https://api.scryfall.com/cards/090f5ad6-e10e-49b3-8643-51a4e792517c/rulings",
+    "prints_search_uri": "https://api.scryfall.com/cards/search?order=released&q=oracleid%3A4e3c3bdc-667d-42ec-b960-159a39c53cb3&unique=prints",
+    "collector_number": "1",
+    "digital": false,
+    "rarity": "common",
+    "flavor_text": "“None of your history books mention me?” laughed Daria. “They will now.”",
+    "card_back_id": "0aeebaf5-8c7d-4636-9e82-8c27447861f7",
+    "artist": "Ron Walotsky",
+    "artist_ids": [
+      "c7d4e16c-7b55-4ba6-81b9-2d923b8bf9dc"
+    ],
+    "illustration_id": "584fe19c-45dc-421d-988d-bebb5f5a01ef",
+    "border_color": "black",
+    "frame": "1997",
+    "full_art": false,
+    "textless": false,
+    "booster": true,
+    "story_spotlight": false,
+    "edhrec_rank": 10164,
+    "prices": {
+      "usd": "0.21",
+      "usd_foil": "6.63",
+      "usd_etched": null,
+      "eur": "0.11",
+      "eur_foil": "1.50",
+      "tix": "0.14"
+    },
+    "related_uris": {
+      "gatherer": "https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=26382",
+      "tcgplayer_infinite_articles": "https://infinite.tcgplayer.com/search?contentMode=article&game=magic&partner=scryfall&q=Aura+Blast&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "tcgplayer_infinite_decks": "https://infinite.tcgplayer.com/search?contentMode=deck&game=magic&partner=scryfall&q=Aura+Blast&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "edhrec": "https://edhrec.com/route/?cc=Aura+Blast",
+      "mtgtop8": "https://mtgtop8.com/search?MD_check=1&SB_check=1&cards=Aura+Blast"
+    },
+    "purchase_uris": {
+      "tcgplayer": "https://shop.tcgplayer.com/product/productsearch?id=7767&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "cardmarket": "https://www.cardmarket.com/en/Magic/Products/Search?referrer=scryfall&searchString=Aura+Blast&utm_campaign=card_prices&utm_medium=text&utm_source=scryfall",
+      "cardhoarder": "https://www.cardhoarder.com/cards/15057?affiliate_id=scryfall&ref=card-profile&utm_campaign=affiliate&utm_medium=card&utm_source=scryfall"
+    }
+  },
+  {
+    "object": "card",
+    "id": "1b683571-6ac5-4d65-99a6-981755ed4764",
+    "oracle_id": "37da03c2-c03e-453c-8fbf-e1039faceb8c",
+    "multiverse_ids": [
+      4918
+    ],
+    "mtgo_id": 9945,
+    "mtgo_foil_id": 9946,
+    "tcgplayer_id": 5737,
+    "cardmarket_id": 9082,
+    "name": "Soltari Guerrillas",
+    "lang": "en",
+    "released_at": "1997-10-14",
+    "uri": "https://api.scryfall.com/cards/1b683571-6ac5-4d65-99a6-981755ed4764",
+    "scryfall_uri": "https://scryfall.com/card/tmp/272/soltari-guerrillas?utm_source=api",
+    "layout": "normal",
+    "highres_image": true,
+    "image_status": "highres_scan",
+    "image_uris": {
+      "small": "https://c1.scryfall.com/file/scryfall-cards/small/front/1/b/1b683571-6ac5-4d65-99a6-981755ed4764.jpg?1562052792",
+      "normal": "https://c1.scryfall.com/file/scryfall-cards/normal/front/1/b/1b683571-6ac5-4d65-99a6-981755ed4764.jpg?1562052792",
+      "large": "https://c1.scryfall.com/file/scryfall-cards/large/front/1/b/1b683571-6ac5-4d65-99a6-981755ed4764.jpg?1562052792",
+      "png": "https://c1.scryfall.com/file/scryfall-cards/png/front/1/b/1b683571-6ac5-4d65-99a6-981755ed4764.png?1562052792",
+      "art_crop": "https://c1.scryfall.com/file/scryfall-cards/art_crop/front/1/b/1b683571-6ac5-4d65-99a6-981755ed4764.jpg?1562052792",
+      "border_crop": "https://c1.scryfall.com/file/scryfall-cards/border_crop/front/1/b/1b683571-6ac5-4d65-99a6-981755ed4764.jpg?1562052792"
+    },
+    "mana_cost": "{2}{R}{W}",
+    "cmc": 4.0,
+    "type_line": "Creature — Soltari Soldier",
+    "oracle_text": "Shadow (This creature can block or be blocked by only creatures with shadow.)\n{0}: The next time Soltari Guerrillas would deal combat damage to an opponent this turn, it deals that damage to target creature instead.",
+    "power": "3",
+    "toughness": "2",
+    "colors": [
+      "R",
+      "W"
+    ],
+    "color_identity": [
+      "R",
+      "W"
+    ],
+    "keywords": [
+      "Shadow"
+    ],
+    "legalities": {
+      "standard": "not_legal",
+      "future": "not_legal",
+      "historic": "not_legal",
+      "gladiator": "not_legal",
+      "pioneer": "not_legal",
+      "modern": "not_legal",
+      "legacy": "legal",
+      "pauper": "not_legal",
+      "vintage": "legal",
+      "penny": "legal",
+      "commander": "legal",
+      "brawl": "not_legal",
+      "historicbrawl": "not_legal",
+      "paupercommander": "not_legal",
+      "duel": "legal",
+      "oldschool": "not_legal",
+      "premodern": "legal"
+    },
+    "games": [
+      "paper",
+      "mtgo"
+    ],
+    "reserved": false,
+    "foil": false,
+    "nonfoil": true,
+    "finishes": [
+      "nonfoil"
+    ],
+    "oversized": false,
+    "promo": false,
+    "reprint": false,
+    "variation": false,
+    "set_id": "10df3a67-178e-4363-8668-34f0e6edf2a7",
+    "set": "tmp",
+    "set_name": "Tempest",
+    "set_type": "expansion",
+    "set_uri": "https://api.scryfall.com/sets/10df3a67-178e-4363-8668-34f0e6edf2a7",
+    "set_search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Atmp&unique=prints",
+    "scryfall_set_uri": "https://scryfall.com/sets/tmp?utm_source=api",
+    "rulings_uri": "https://api.scryfall.com/cards/1b683571-6ac5-4d65-99a6-981755ed4764/rulings",
+    "prints_search_uri": "https://api.scryfall.com/cards/search?order=released&q=oracleid%3A37da03c2-c03e-453c-8fbf-e1039faceb8c&unique=prints",
+    "collector_number": "272",
+    "digital": false,
+    "rarity": "rare",
+    "card_back_id": "0aeebaf5-8c7d-4636-9e82-8c27447861f7",
+    "artist": "Val Mayerik",
+    "artist_ids": [
+      "289e552e-3b58-484f-a939-64a01426e84d"
+    ],
+    "illustration_id": "b017e414-9294-4b66-8436-4429f42caffe",
+    "border_color": "black",
+    "frame": "1997",
+    "full_art": false,
+    "textless": false,
+    "booster": true,
+    "story_spotlight": false,
+    "edhrec_rank": 12537,
+    "prices": {
+      "usd": "0.62",
+      "usd_foil": null,
+      "usd_etched": null,
+      "eur": "0.75",
+      "eur_foil": null,
+      "tix": "0.02"
+    },
+    "related_uris": {
+      "gatherer": "https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=4918",
+      "tcgplayer_infinite_articles": "https://infinite.tcgplayer.com/search?contentMode=article&game=magic&partner=scryfall&q=Soltari+Guerrillas&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "tcgplayer_infinite_decks": "https://infinite.tcgplayer.com/search?contentMode=deck&game=magic&partner=scryfall&q=Soltari+Guerrillas&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "edhrec": "https://edhrec.com/route/?cc=Soltari+Guerrillas",
+      "mtgtop8": "https://mtgtop8.com/search?MD_check=1&SB_check=1&cards=Soltari+Guerrillas"
+    },
+    "purchase_uris": {
+      "tcgplayer": "https://shop.tcgplayer.com/product/productsearch?id=5737&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+      "cardmarket": "https://www.cardmarket.com/en/Magic/Products/Search?referrer=scryfall&searchString=Soltari+Guerrillas&utm_campaign=card_prices&utm_medium=text&utm_source=scryfall",
+      "cardhoarder": "https://www.cardhoarder.com/cards/9945?affiliate_id=scryfall&ref=card-profile&utm_campaign=affiliate&utm_medium=card&utm_source=scryfall"
+    }
+  }
+]
