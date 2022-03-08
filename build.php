@@ -74,12 +74,10 @@
 		'token_small_R',
 		'token_small'
   );
-  
-  $iniList = array(
-    'regular_vehicle_legendary'
-  );
-	        
+		      
   foreach($iniList as $inikey) {
+		echo "$inikey\n";
+		
     foreach (array('A','W','U','B','R','G','M','C','WU','WB','UB','UR','BR','BG','RG','RW','GW','GU') as $colorkey) {
       if ((strpos($inikey, 'multicolor') !== false) && (strlen($colorkey) == 1)) {
         continue;
@@ -287,7 +285,7 @@
             if (strtolower($key) !== 'background12') {
               $svg .= '<image x="' . $recipe[$key]['x'] . '" y="' . $recipe[$key]['y'] . '" width="' . $recipe[$key]['width'] . '" height="' . $recipe[$key]['height'] . '" xlink:href="data:image/' . $filetype . ';base64,' . base64_encode(file_get_contents($recipe[$key]['file'])) . '"/>';
             }
-          } else if ($filetype === 'svg') {
+          } else if ($filetype === 'svg') {						
             $file_contents = file_get_contents($recipe[$key]['file']);
             $file_contents = preg_replace('/<svg [^>]+>/', '', $file_contents);
         

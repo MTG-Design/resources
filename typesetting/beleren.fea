@@ -1,0 +1,15 @@
+# Script and language coverage
+#         languagesystem DFLT dflt;
+#         languagesystem latn dflt;
+
+languagesystem DFLT dflt; 
+languagesystem latn dflt;
+
+
+feature nolg {
+        ignore substitute  f' l' [a] [u] [f];
+        ignore substitute  [i] f' l' [i] [c] [h];
+        substitute  f' l' by f_l ;
+        ignore substitute  f' f' [o] [r] [m];
+        substitute  f' f' by f_f ;
+         } nolg;

@@ -1,5 +1,10 @@
 <?php
 
+function fixContextualAlternates($theText)
+{
+	return preg_replace('/([fhkmn])(?=[^\sFJgjpy])/', '\noalt{$1}', $theText);
+}
+
 function getFrameImage($cardData, $fmt, $els)
 {
   $color = 'C';
@@ -76,19 +81,80 @@ function getFrameImage($cardData, $fmt, $els)
   return array($frameImage, $frameIni);
 }
 
+function sanitizeText($string)
+{
+	//$string = str_replace('\\', '\textbackslash ', $string);
+	$string = preg_replace('/(?=[\&\%\$\#\_\{\}])/', '\\', $string);
+	$string = str_replace('~', '\textasciitilde ', $string);
+	$string = str_replace('^', '\textasciicircum ', $string);
+
+	return trim($string);
+}
+
 function substituteRules($rules)
 {
-	$rules = str_replace('*(', '(', $rules);
-	$rules = str_replace(')*', ')', $rules);
+	//$rules = str_replace('\\\\', '\n', $rules);
+	$rules = str_replace("'", "’", $rules);
+	$rules = sanitizeText($rules);
+	$rules = str_replace("\n", '\vspace{.5\baselineskip}\newline ', $rules);
 	$rules = preg_replace('/\(([\S^\)][^\)]*[\S^\)])\)/', '\emph{($1)}' , $rules);
+	$rules = preg_replace('/\*([^\*]+)\*/', '\emph{$1}', $rules);
 	
-	return $rules;
+	return trim($rules);
+}
+
+function substituteFlavor($flavor)
+{
+	//$flavor = str_replace('\\\\', '\n', $flavor);
+	$flavor = sanitizeText($flavor);
+	$flavor = str_replace("\n", '\newline ', $flavor);
+	$flavor = preg_replace('/\*([^\*]+)\*/', '\emph{$1}', trim($flavor));
+
+	return $flavor;
+}
+
+
+function createMana($mana)
+{
+	$mana_array = preg_split("/[\{\}\(\)\[\]]+/", $mana, 0, PREG_SPLIT_NO_EMPTY);
+	$mana_tex = '';
+	
+	foreach ($mana_array as $mana_element) {
+		switch ($mana_element) {
+			case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '10': case '11': case '12': case '13': case '14': case '15': case '16': case '17': case '18': case '19': case '20': case 'C': case 'S': case 'T':
+				        $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{genericmana}{O}' . $mana_element; break;
+      case 'W': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{whitemana}{O}W'; break;
+      case 'U': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{bluemana}{O}U'; break;
+      case 'B': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{blackmana}{O}B'; break;
+      case 'R': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{redmana}{O}R'; break;
+      case 'G': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{greenmana}{O}G'; break;
+      case 'C': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{colorlessmana}{O}C'; break;
+      case 'S': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{colorlessmana}{O}S'; break;
+/*
+			case '{W/P}'
+			case '{W/U}'
+			case '{W/B}'
+			case '{W/U/P}'
+			case '{W/B/P}'
+			*/			
+		}
+	}
+	return $mana_tex;
 }
 
 function createTeX($cardData, $fmt, $els, $cfg, $opt)
-{	
+{
+	$pwd = exec('pwd');
+	
+	$mana_tex = createMana($cardData[$els[$fmt]['manacost']]);
+	
   $name   = preg_replace('/([fhkmn]) /', '\alt{' . "$1" . '} ', $cardData[$els[$fmt]['name']] . ' ');
-  $types  = preg_replace('/([fhkmn]) /', '\alt{' . "$1" . '} ', $cardData[$els[$fmt]['types']] . ' ');
+	$name   = fixContextualAlternates($cardData[$els[$fmt]['name']]);
+
+  $name   = str_replace("'", '’', $name);
+	$types  = preg_replace('/([fhkmn]) /', '\alt{' . "$1" . '} ', $cardData[$els[$fmt]['types']] . ' ');
+	$types  = fixContextualAlternates($cardData[$els[$fmt]['types']]);
+	
   $set    = strtoupper($cardData[$els[$fmt]['set']]);
   
   $rarity = (strtoupper($cardData[$els[$fmt]['rarity']][0]));
@@ -99,20 +165,23 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
 */  $cnline = $cardData[$els[$fmt]['number']];
 //}
 
-  $cardData['setSymbolWidth'] = 32;
+  $cardData['setSymbolWidth'] = 40;
   
   if ($cfg['title']['align'] !== 'center') {
-    $cfg['title']['align'] = 'flush' . $cfg['title']['align'];
+    $cfg['title']['align'] = 'flushleft';
   }
 	
-	$titleColor = 'white';
-	$titleColor = $cfg['title']['color'];
-	$titleColorIfWhite = $cfg['title']['color_if_white'];
+	$titleColor = 'black';
+	if ($cfg['title']['color']) {
+		$titleColor = $cfg['title']['color'];		
+	}
 	
-	echo "Title color: " . $cardData[$els[$fmt]['color']] . "\n";
-
+	$titleColorIfWhite = $titleColor;
+	
 	if (trim(preg_replace('/[\{\}]/', '', $cardData[$els[$fmt]['color']]))[0] == 'W') {
-		$titleColor = $titleColorIfWhite;
+		if ($cfg['title']['color_if_white']) {
+			$titleColor = $cfg['title']['color_if_white'];
+		}
 	}
 
 	if ($titleColor == '#000') {
@@ -121,8 +190,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
 		$titleColor = 'offwhite';
 	}
 		
-	$text = substituteRules($cardData[$els[$fmt]['text']]);
-	
+	$text = trim(substituteRules($cardData[$els[$fmt]['text']]));
+	$flavor = trim(substituteFlavor($cardData[$els[$fmt]['flavor']]));
+		
   $buffer = '\documentclass{article}
   \usepackage[absolute]{textpos}
   \usepackage{calc}
@@ -148,8 +218,10 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
     UprightFont = *-Bold,
     BoldFont = *-Bold,
     ItalicFont = *-Bold,
-    Extension = .otf,
-    PunctuationSpace = 0
+    Extension = .ttf,
+    PunctuationSpace = 0,
+		Contextuals=WordFinal,
+		Ligatures = Common
   ]{Beleren2016}
 
   \newfontfamily\belerensmallcaps[
@@ -157,9 +229,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
     UprightFont = *-Bold,
     BoldFont = *-Bold,
     ItalicFont = *-Bold,
-    Extension = .otf,
+    Extension = .ttf,
     PunctuationSpace = 0
-  ]{belerensmallcaps}
+  ]{BelerenSC}
   
   \newfontfamily\gotham[
     Path = fonts/ ,
@@ -190,7 +262,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
     ItalicFont = *-Italic,
     UprightFeatures = {Ligatures = NoCommon},
     BoldFeatures = {Ligatures = NoCommon},
-    ItalicFeatures = {Ligatures = NoContextual},
+    ItalicFeatures = {Ligatures = NoCommon},
     Extension = .otf,
     PunctuationSpace = 0
   ]{PlantinMTPro}
@@ -206,19 +278,6 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
    \definecolor{darkblackmana} {RGB} {143, 138, 135}
    \definecolor{goldmana}      {RGB} {246, 210,  98}
    \definecolor{offwhite}      {RGB} {254, 254, 254}
-
-%  \definecolor{genericmana}   {RGB} {215, 207, 207}
-%  \definecolor{colorlessmana} {RGB} {215, 207, 207}
-%  \definecolor{whitemana}     {RGB} {255, 255, 223}
-%  \definecolor{bluemana}      {RGB} {191, 231, 247}
-%  \definecolor{blackmana}     {RGB} {215, 207, 207}
-%  \definecolor{redmana}       {RGB} {247, 191, 159}
-%  \definecolor{greenmana}     {RGB} {175, 223, 191}
-%  \definecolor{blackborder}   {RGB} { 31,  31,  31}
-%  \definecolor{darkblackmana} {RGB} {143, 143, 135}
-%  \definecolor{goldmana}      {RGB} {247, 207,  95}
-%  \definecolor{offwhite}      {RGB} {254, 254, 254}
-
   
   % 241, 243, 236
   %  13, 112, 181
@@ -228,9 +287,11 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
 
   \pagenumbering{gobble}
   \parindent=0pt
-  \newcommand{\alt}[1]{\begingroup\addfontfeature{RawFeature=+fina}#1\addfontfeature{RawFeature=-fina}\endgroup}
 
-  \color{black}
+	\newcommand{\alt}[1]{\begingroup\addfontfeature{RawFeature=+fina}#1\addfontfeature{RawFeature=-fina}\endgroup}
+	\newcommand{\noalt}[1]{\begingroup\addfontfeature{RawFeature=-fina}#1\addfontfeature{RawFeature=+fina}\endgroup}
+  
+	\color{black}
 
   \begin{document}
   \newlength{\titlelength}
@@ -241,7 +302,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \mana
 	\color{' . $titleColor . '}
   \selectfont
-  \settowidth{\manalength}{' . $cardData[$els[$fmt]['manaCost']] . '\strut}
+  \settowidth{\manalength}{' . $mana_tex . '\strut}
 
   \\' . str_replace(' ', '', strtolower($cfg['title']['font'])) . '
   \count255 = ' . $cfg['title']['size'] . '
@@ -257,34 +318,55 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   
   
   \ifnum\count255 >23
-  \begin{' . $cfg['title']['align'] . '}
-  \raisebox{\the\dimexpr(' . $cfg['title']['size'] . 'pt - \the\count255 pt) / 4}{' . $name . '\strut}
+  \begin{' . $cfg['title']['align'] . '}' . 
+  $name . '\strut
   \end{' . $cfg['title']['align'] . '}
   \else
   \relax  
   \fi
-  \hfill
-  \fontsize{44pt}{44pt}
-  \mana
-	\color{black}
-  \selectfont
-  \kern-' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp \raisebox{2bp}{' . $cardData[$els[$fmt]['manaCost']] . '\strut}
-  \end{textblock*}
+	\end{textblock*}
+	';
+	
+	if ($cfg['manacost']['align'] == 'right') {
+		$buffer .= '\begin{textblock*}{' . $cfg['manacost']['width'] . 'bp}(' . ($cfg['manacost']['x'] - $cfg['manacost']['width']) . 'bp, ' . $cfg['manacost']['y'] . 'bp)
+	\begin{flushright}
+	';
+	} else {
+		$buffer .= '\begin{textblock*}{' . $cfg['manacost']['width'] . 'bp}(' . $cfg['manacost']['x'] . 'bp, ' . $cfg['manacost']['y'] . 'bp)
+	\begin{flushleft}
+	';
+	}
+	
+  $buffer .= $mana_tex . '\strut
+	';
+	if ($cfg['manacost']['align'] == 'right') {
+	  $buffer .= '\end{flushright}
+  ';
+	} else {
+	  $buffer .= '\end{flushleft}
+  ';
+	}
+  $buffer .= '\end{textblock*}
 
   \begin{textblock*}{' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
   \beleren
   \selectfont
   \count255 = ' . $cfg['typeline']['size'] . '
   \loop
-  \fontsize{\the\dimexpr(\the\count255 pt - 0.25pt)}{' . $cfg['typeline']['size'] . 'pt}
+  \fontsize{\the\dimexpr(\the\count255 pt)}{' . $cfg['typeline']['size'] . 'pt}
   \selectfont
   \settowidth{\titlelength}{' . $types . '\strut}
   \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp
   \advance \count255 by -1
   \repeat
   
-  \raisebox{\the\dimexpr(' . $cfg['typeline']['size'] . 'pt - \the\count255 pt)}{' . $types . '\strut}
+  ' . $types . '\strut
   \end{textblock*}
+	
+	% Set Symbol
+	\begin{textblock*}{' . $cardData['setSymbolWidth'] . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
+	% \includegraphics{' . $pwd . '/symbol/' . $cardData[$els[$fmt]['set']] . '_' . strtoupper($cardData[$els[$fmt]['rarity']])[0] . '.png} 
+	\end{textblock*}
 
   % Rules and Flavor Text
   \newlength{\rulesheight}
@@ -296,12 +378,14 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \loop
   \fontsize{\count255 pt}{\count255 pt}
   \selectfont
-  \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}\relax ' . $text;
+  \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
   
-  if ($cardData[$els[$fmt]['flavor']]) {
-    $buffer .= '  
-  \par\raisebox{0em}{\includegraphics[scale=0.25]{typesetting/flavorbar.png}}\par
-  \emph{' . $cardData[$els[$fmt]['flavor']];
+  if ($text && $flavor) {
+    $buffer .= $text . '\relax\newline\vspace{-.2em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+	} else if ($text && !$flavor) {
+		$buffer .= $text;
+  } else if (!$text && $flavor) {
+  	$buffer .= $flavor;
   }
   
   $buffer .= '\relax
@@ -325,13 +409,14 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
 		$textEnd   = '\end{center}';
 	}
 	
-  $buffer .= $textBegin . '\relax ' . $text;
+  $buffer .= $textBegin;
   
-  if ($cardData[$els[$fmt]['flavor']]) {
-    $buffer .= '\relax
-  \par\raisebox{0em}{\includegraphics[scale=0.25]{typesetting/flavorbar.png}}\par
-  \emph{' . $cardData[$els[$fmt]['flavor']] . '}
-  ';
+  if ($text && $flavor) {
+    $buffer .= $text . '\relax\newline\vspace{-.2em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+	} else if ($text && !$flavor) {
+		$buffer .= $text;
+  } else if (!$text && $flavor) {
+  	$buffer .= $flavor;
   }
   
   $buffer .= $textEnd . '
@@ -367,12 +452,12 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \fontsize{18.5pt}{21pt}
   \selectfont
   \kern-7bp
-  ' . $cardData[$els[$fmt]['artist']] . '
+  ' . sanitizeText($cardData[$els[$fmt]['artist']]) . '
   \end{flushleft}
   \end{textblock*}
 
   % Designer credit
-  \begin{textblock*}{360bp}(' . ($cfg['designer']['x'] - 360) . 'bp, ' . ($cfg['designer']['y']) . 'bp)
+  \begin{textblock*}{360bp}(' . ($cfg['designer']['x'] - 392) . 'bp, ' . ($cfg['designer']['y']) . 'bp)
   \begin{flushright}
   \fontsize{17pt}{20pt}
   \belerensmallcaps
@@ -382,7 +467,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \end{flushright}
   \end{textblock*}
   ';
-	
+		
   if (!array_key_exists('c', $opt)) {
 		$buffer .= '
   % Copyright
@@ -406,7 +491,6 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \gotham
   \color{offwhite}
   \selectfont
-% \includegraphics[trim={341 0 435 0},clip]{resources/assets/gotham.png}
   \addfontfeature{LetterSpace=8.0}
   ' . $cnline . '\strut
   \addfontfeature{LetterSpace=0.0}
@@ -432,7 +516,6 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \gotham
   \color{offwhite}
   \selectfont
-% \includegraphics[trim={29 0 744 0},clip]{resources/assets/gotham.png}
   ' . $rarity . '\strut
   \end{flushleft}
   \end{textblock*}
