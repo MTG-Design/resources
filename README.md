@@ -44,13 +44,13 @@ Only specify one format when using the renderer.
 Only the LackeyBot JSON format has been tested. (A converter exists to convert from MSE2 to LackeyBot JSON.) Other formats will be included in future updates.
 
 ### Options
-`-c`	will render the card without any copyright line.
-`-d`	can be used to add designer credit to a card. By default, this appears in the bottom right corner, to the left of the copyright logo.
-`-h`	shows the usage description. (A full help page will be added in the future.)
-`-k`	keeps all intermediate render files. This includes the `.tex`, `.aux`, and `.log` LaTeX files, `.pdf` and `.png` files used for text and card images.
-`-n`	starts at the nth card in the JSON file and continues rendering until it stops.
-`-p`	outputs with a larger bleed area around the border. This is helpful for people who are printing cards for personal use.
-`-v`	outputs as SVG. Currently, this doesn not include the flavor bar, and potentially other graphics.
+`-c`	will render the card without any copyright line.  
+`-d`	can be used to add designer credit to a card. By default, this appears in the bottom right corner, to the left of the copyright logo.  
+`-h`	shows the usage description. (A full help page will be added in the future.)  
+`-k`	keeps all intermediate render files. This includes the `.tex`, `.aux`, and `.log` LaTeX files, `.pdf` and `.png` files used for text and card images.  
+`-n`	starts at the nth card in the JSON file and continues rendering until it stops.  
+`-p`	outputs with a larger bleed area around the border. This is helpful for people who are printing cards for personal use.  
+`-v`	outputs as SVG. Currently, this doesn not include the flavor bar, and potentially other graphics.  
 
 ### Rendering
 
