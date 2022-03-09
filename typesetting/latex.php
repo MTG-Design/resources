@@ -470,7 +470,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
 		
   if (!array_key_exists('c', $opt)) {
 		$buffer .= '
-  % Copyright
+  Copyright
   \begin{textblock*}{360bp}(' . ($cfg['copyright']['x'] - 360) . 'bp, ' . ($cfg['copyright']['y']) . 'bp)
   \begin{flushright}
   \fontsize{17pt}{20pt}

@@ -11,7 +11,7 @@
 	
   include("typesetting/latex.php");
   
-  $options = getopt("d:n:chklmsprv", array("help"));
+  $options = getopt("d:l:m:n:s:chkprv", array("help"));
   
   if (!$options || array_key_exists('h', $options) || array_key_exists('help', $options)) {
 	  die("usage: render.php <format> [<options>] <path>\n\nFormats:\n  -l\tLackeyBot JSON format\n  -m\tMTGJSON JSON format (Not finished)\n  -s\tScryfall JSON format (Not finished)\n\nOptions:\n  -c\tRemove copyright line\n  -d\tAdd text for designer field to each card\n  -h\tDisplays this usage description\n  -k\tKeep intermediate and temporary render files\n  -n\tStart rendering at card number\n  -p\tOutput as print ready (With bleed area)\n  -v\tOutput as SVG instead of PDF (No flavor bar or graphics)\n\n");
