@@ -262,10 +262,10 @@
 			unlink("$pwd/output/{$thisFile}_txt 300.png");
 			unlink("$pwd/output/{$thisFile}_txt.pdf");
 			unlink("$pwd/output/{$thisFile}_txt.png");
-			unlink("$pwd/output/{$thisFile}_txt.aux");
-			unlink("$pwd/output/{$thisFile}_txt.log");
-			unlink("$pwd/output/{$thisFile}_txt.pdf");
-			unlink("$pwd/output/{$thisFile}_txt.tex");
+			unlink("$pwd/output/{$thisFile}.aux");
+			unlink("$pwd/output/{$thisFile}.log");
+			unlink("$pwd/output/{$thisFile}.pdf");
+			unlink("$pwd/output/{$thisFile}.tex");
 		}
   }
 ?>
