@@ -113,8 +113,20 @@
     echo $card[$elements[$format]['name']] . "\n" . $card[$elements[$format]['types']] . "\n";
     $filenames[] = "$count {$card[$elements[$format]['name']]}";
     $thisFile = $filenames[$count - 1];
+		
+		// Put symbol into file
+		$symbolPath = $pwd . '/symbol/' . $card[$elements[$format]['set']] . '_' . strtoupper($card[$elements[$format]['rarity']])[0];
+				
+		if (!file_exists("$symbolPath.png")) {
+			$symbolPath = $pwd . '/symbol/SET_' . strtoupper($card[$elements[$format]['rarity']])[0];
+		}
+    list($imgSymbolWidth, $imgSymbolHeight, $imgSymbolType, $imgSymbolAttr) = getimagesize("$symbolPath.png");
+		$symbolData = base64_encode(file_get_contents("$symbolPath.png"));
+		$newSymbolHeight = 64;
+		$imgSymbolHeightRatio = ($newSymbolHeight / $imgSymbolHeight);
+		$newSymbolWidth = ($imgSymbolWidth * $imgSymbolHeightRatio);
   
-    file_put_contents("$pwd/output/$thisFile.tex", createTeX($card, $format, $elements, $textcfg, $options));
+    file_put_contents("$pwd/output/$thisFile.tex", createTeX($card, $format, $elements, $textcfg, $newSymbolWidth, $options));
         
     if ($format == 'Scryfall') {
       $thisImage = $card['image_uris']['art_crop'];
@@ -137,18 +149,7 @@
 			$preparesvg = file_get_contents("cards/$frameImage.svg");
 		}
 		
-		// Put symbol into file
-		$symbolPath = $pwd . '/symbol/' . $card[$elements[$format]['set']] . '_' . strtoupper($card[$elements[$format]['rarity']])[0];
-				
-		if (file_exists("$symbolPath.png")) {
-      list($imgWidth, $imgHeight, $imgType, $imgAttr) = getimagesize("$symbolPath.png");
-			$symbolData = base64_encode(file_get_contents("$symbolPath.png"));
-			$newHeight = 64;
-			$imgHeightRatio = ($newHeight / $imgHeight);
-			$newWidth = ($imgWidth * $imgHeightRatio);
-			
-	    $preparesvg = str_lreplace("</svg>", "", $preparesvg) . "<image x=\"" . ($textcfg['symbol']['x'] - $newWidth) . "\" y=\"" . $textcfg['symbol']['y'] . "\" width=\"$newWidth\" height=\"$newHeight\" xlink:href=\"data:image/png;base64," . $symbolData . "\"/></svg>";
-		}
+    $preparesvg = str_lreplace("</svg>", "", $preparesvg) . "<image x=\"" . ($textcfg['symbol']['x'] - $newSymbolWidth) . "\" y=\"" . $textcfg['symbol']['y'] . "\" width=\"$newSymbolWidth\" height=\"$newSymbolHeight\" xlink:href=\"data:image/png;base64," . $symbolData . "\"/></svg>";
 		
     if (file_exists($thisImage)) {
       list($imgWidth, $imgHeight, $imgType, $imgAttr) = getimagesize($thisImage);
@@ -249,7 +250,7 @@
       $compo = imagecreatefrompng("$pwd/output/{$thisFile}_txt 300.png");
 			
 		  if (array_key_exists('p', $options)) {
-				imagecopy($base, $compo, 37, 35, 0, 0, imagesx($compo), imagesy($compo));				
+				imagecopy($base, $compo, 38, 36, 0, 0, imagesx($compo), imagesy($compo));				
 			} else {
 				imagecopy($base, $compo, 0, 0, 0, 0, imagesx($compo), imagesy($compo));				
 			}

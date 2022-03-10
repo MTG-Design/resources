@@ -70,7 +70,7 @@ function getFrameImage($cardData, $fmt, $els)
     $isRare = 'R';
   }
   
-  $recipeIngredients = array('isVehicle', 'isLand', 'isLegendary', 'isMulticolor', 'isPromo', 'isCreature', 'isRare', 'color');
+  $recipeIngredients = array('isVehicle', 'isCreature', 'isLand', 'isLegendary', 'isMulticolor', 'isPromo', 'isRare', 'color');
 
   for ($i = 0; $i < count($recipeIngredients); $i++) {
     if (${$recipeIngredients[$i]}) {
@@ -142,7 +142,7 @@ function createMana($mana)
 	return $mana_tex;
 }
 
-function createTeX($cardData, $fmt, $els, $cfg, $opt)
+function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 {
 	$pwd = exec('pwd');
 	
@@ -356,7 +356,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \fontsize{\the\dimexpr(\the\count255 pt)}{' . $cfg['typeline']['size'] . 'pt}
   \selectfont
   \settowidth{\titlelength}{' . $types . '\strut}
-  \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp
+  \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $sym) . 'bp
   \advance \count255 by -1
   \repeat
   
@@ -364,7 +364,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \end{textblock*}
 	
 	% Set Symbol
-	\begin{textblock*}{' . $cardData['setSymbolWidth'] . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
+	\begin{textblock*}{' . $sym . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
 	% \includegraphics{' . $pwd . '/symbol/' . $cardData[$els[$fmt]['set']] . '_' . strtoupper($cardData[$els[$fmt]['rarity']])[0] . '.png} 
 	\end{textblock*}
 
@@ -381,7 +381,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
   
   if ($text && $flavor) {
-    $buffer .= $text . '\relax\newline\vspace{-.2em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+    $buffer .= $text . '\relax\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 	} else if ($text && !$flavor) {
 		$buffer .= $text;
   } else if (!$text && $flavor) {
@@ -412,7 +412,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $opt)
   $buffer .= $textBegin;
   
   if ($text && $flavor) {
-    $buffer .= $text . '\relax\newline\vspace{-.2em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+    $buffer .= $text . '\relax\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 	} else if ($text && !$flavor) {
 		$buffer .= $text;
   } else if (!$text && $flavor) {
