@@ -9,15 +9,69 @@
 	  return $subject;
 	}
 	
+	function sortMana($mana) {
+		$mv = 0;
+		$color = 'C';
+		$mana = str_split($mana);
+		
+		foreach ($mana as $elem) {
+			switch ($elem) {
+				case 'W':  $mv += 1; break;
+				case 'U':  $mv += 2; break;
+				case 'B':  $mv += 4; break;
+				case 'R':  $mv += 8; break;
+				case 'G':  $mv +=16; break;
+			}
+		}
+		
+		switch ($mv) {
+			case 0:  $color = 'C'; break;
+			case 1:  $color = 'W'; break;
+			case 2:  $color = 'U'; break;
+			case 3:  $color = 'WU'; break;
+			case 4:  $color = 'B'; break;
+			case 5:  $color = 'WB'; break;
+			case 6:  $color = 'UB'; break;
+			case 7:  $color = 'WUB'; break;
+			case 8:  $color = 'R'; break;
+			case 9:  $color = 'RW'; break;
+			case 10: $color = 'UR'; break;
+			case 11: $color = 'URW'; break;
+			case 12: $color = 'BR'; break;
+			case 13: $color = 'RWB'; break;
+			case 14: $color = 'UBR'; break;
+			case 15: $color = 'WUBR'; break;
+			case 16: $color = 'G'; break;
+			case 17: $color = 'GW'; break;
+			case 18: $color = 'GU'; break;
+			case 19: $color = 'GWU'; break;
+			case 20: $color = 'BG'; break;
+			case 21: $color = 'WBG'; break;
+			case 22: $color = 'BGU'; break;
+			case 23: $color = 'GWUB'; break;
+			case 24: $color = 'RG'; break;
+			case 25: $color = 'RGW'; break;
+			case 26: $color = 'GUR'; break;
+			case 27: $color = 'RGWU'; break;
+			case 28: $color = 'BRG'; break;
+			case 29: $color = 'BRGW'; break;
+			case 30: $color = 'UBRG'; break;
+			case 31: $color = 'WUBRG'; break;
+		}
+		return $color;
+	}	
+	
   include("typesetting/latex.php");
   
-  $options = getopt("d:l:m:n:s:chkprv", array("help"));
+  $options = getopt("a:d:e:l:m:n:s:z:bchkprv", array("help"));
   
   if (!$options || array_key_exists('h', $options) || array_key_exists('help', $options)) {
-	  die("usage: render.php <format> [<options>] <path>\n\nFormats:\n  -l\tLackeyBot JSON format\n  -m\tMTGJSON JSON format (Not finished)\n  -s\tScryfall JSON format (Not finished)\n\nOptions:\n  -c\tRemove copyright line\n  -d\tAdd text for designer field to each card\n  -h\tDisplays this usage description\n  -k\tKeep intermediate and temporary render files\n  -n\tStart rendering at card number\n  -p\tOutput as print ready (With bleed area)\n  -v\tOutput as SVG instead of PDF (No flavor bar or graphics)\n\n");
+	  die("usage: render.php <format> [<options>] <path>\n\nFormats:\n  -l\tLackeyBot JSON format\n  -m\tMTGJSON JSON format (Not finished)\n  -s\tScryfall JSON format (Not finished)\n\nOptions:\n  -a\tArtist override\n  -b\tBorderless promo frame\n  -c\tRemove copyright line\n  -d\tAdd text for designer field to each card\n  -e\tSet override\n  -h\tDisplays this usage description\n  -k\tKeep intermediate and temporary render files\n  -n\tRender a specific card or range of cards (using a hyphen)\n  -p\tOutput as print ready (With bleed area)\n  -r\tDon’t print reminder text\n  -v\tOutput as SVG instead of PDF (No flavor bar or graphics)\n  -z\tMax text size override (an integer, 18-38)\n\n");
   }
 	
 	$pwd = exec('pwd');
+	
+	$early_abort = false;
 	  
   #  -l   LackeyBot JSON 
   #  -m   MTGJSON JSON
@@ -44,7 +98,7 @@
     'Scryfall' => array(
       'name' => 'name',
       'manacost' => 'mana_cost',
-      'color' => 'color',
+      'color' => 'colors',
       'types' => 'type_line',
       'text' => 'oracle_text',
       'flavor' => 'flavor_text',
@@ -53,9 +107,11 @@
       'toughness' => 'toughness',
       'loyalty' => 'loyalty',
       'artist' => 'artist',
-      'set' => 'setCode',
+      'set' => 'set',
       'language' => 'lang',
+			'number' => 'collector_number',
 			'watermark' => 'watermark',
+      'designer' => 'designer',
     ),
     'MTGJSON' => array(
       'name' => 'name',
@@ -83,7 +139,12 @@
 	  $source = json_decode(file_get_contents($options['m']), true);
   } else {
     $format = 'Scryfall';
-	  $source = json_decode(file_get_contents($options['y']), true);
+		if (file_exists($options['s'])) {
+		  $source = json_decode(file_get_contents($options['s']), true);
+		} else {
+			$source = json_decode(file_get_contents('https://api.scryfall.com/cards/search?q=' . rawurlencode($options['s'])));
+			$source = ((array)$source)['data'][0];
+		}
 	}
 	
   $start = $end = $count = 0;
@@ -96,7 +157,7 @@
 		}
 	} else {
 		$start = 0;
-		$end = count($source);
+		$end = count((array)$source);
 	}
 		  
   foreach($source as $card) {
@@ -107,34 +168,66 @@
 		} else if ($count > $end) {
 			continue;
 		}
-    
-    $card = array_merge(json_decode(file_get_contents("typesetting/default_" . strtolower($format) . ".json"), true), $card);
-    list($frameImage, $frame_ini) = getFrameImage($card, $format, $elements);
-		
-		if (array_key_exists('d', $options)) {
-			$card[$elements[$format]['designer']] = $options['d'];
+				
+		if (array_key_exists('s', $options)) {
+			if (is_string($card)) {
+				$card = $source;
+				$early_abort = true;				
+			}
+	    $card = array_merge(json_decode(file_get_contents("typesetting/default_" . strtolower($format) . ".json"), true), ((array)$card));			
+			if (count($card['colors']) == 1) {
+				$card[$elements[$format]['color']] = $card['colors'][0];
+			} else if (count($card['colors']) == 2) {
+				$card[$elements[$format]['color']] = sortMana(implode('', $card['colors']));
+			} else {
+				$card[$elements[$format]['color']] = 'M';
+			}
+		} else {
+	    $card = array_merge(json_decode(file_get_contents("typesetting/default_" . strtolower($format) . ".json"), true), $card);			
 		}
-
-    //echo "Frame Image: $frameImage\n";
-    //echo "Frame ini File: $frame_ini\n";
-    
+		
+		if (array_key_exists('r', $options)) {
+			$card[$elements[$format]['text']] = preg_replace('/\([^\)]+\)/', '', $card[$elements[$format]['text']]);
+		}
+		
+		if (array_key_exists('b', $options)) {
+			$card['promo'] = true;
+		} else {
+			$card['promo'] = false;
+		}
+							
+    list($frameImage, $frame_ini) = getFrameImage($card, $format, $elements);
+		    
     $recipe  = "frame/$frameImage.svg";
     $textcfg  = parse_ini_file("typesetting/$frame_ini.ini", true);
     $frame_cfg = parse_ini_file("frame/$frame_ini.ini", true);
 		
-    echo $card[$elements[$format]['name']] . "\n";
     $filenames[] = "$count {$card[$elements[$format]['name']]}";
     $thisFile = $filenames[$count - 1];
 		
+		if (array_key_exists('a', $options)) { $card[$elements[$format]['artist']] = $options['a']; }
+		if (array_key_exists('d', $options)) { $card[$elements[$format]['designer']] = $options['d']; }
+		if (array_key_exists('e', $options)) { $card[$elements[$format]['set']] = strtoupper($options['e']); }
+		if (array_key_exists('z', $options)) { $textcfg['textbox']['size'] = $options['z']; }
+
 		if ($card[$elements[$format]['rarity']] == 'basic land') {
 			$card[$elements[$format]['rarity']] = 'land';
 		}
-		
+				
 		// Put symbol into file
-		$symbolPath = $pwd . '/symbol/' . $card[$elements[$format]['set']] . '_' . strtoupper($card[$elements[$format]['rarity']])[0];
+		
+		if ($card[$elements[$format]['set']]) {
+			$symbolPath = $pwd . '/symbol/' . strtoupper($card[$elements[$format]['set']]) . '_' . strtoupper($card[$elements[$format]['rarity']])[0];			
+		} else {
+			$card[$elements[$format]['set']] = 'SET';
+			$symbolPath = $pwd . '/symbol/SET_' . strtoupper($card[$elements[$format]['rarity']])[0];
+		}
 		
 		if (!file_exists("$symbolPath.png")) {
 			$symbolPath = $pwd . '/symbol/SET_' . strtoupper($card[$elements[$format]['rarity']])[0];
+			if (!file_exists("$symbolPath.png")) {
+				$symbolPath = $pwd . '/symbol/SET_C'; 
+			}
 		}
     list($imgSymbolWidth, $imgSymbolHeight, $imgSymbolType, $imgSymbolAttr) = getimagesize("$symbolPath.png");
 		$symbolData = base64_encode(file_get_contents("$symbolPath.png"));
@@ -151,9 +244,18 @@
     file_put_contents("$pwd/output/$thisFile.tex", createTeX($card, $format, $elements, $textcfg, $newSymbolWidth, $options));
         
     if ($format == 'Scryfall') {
-      $thisImage = $card['image_uris']['art_crop'];
-    } else {  
-      $thisImage = "$pwd/art/" . $card[$elements[$format]['name']];
+			$thisImage = "$pwd/art/" . $card[$elements[$format]['name']];
+			if (!glob("$thisImage.*")) {
+				$art_crop = (array)array($card['image_uris'])[0];
+				$art_crop = $art_crop['art_crop'];
+				copy($art_crop, "$thisImage.jpg");
+			}
+    } else {
+			if (count($card['notes']) && array_key_exists('image', $card['notes'][0])) {
+	      $thisImage = "$pwd/art/" . $card['notes'][0]['image'];				
+			} else {
+	      $thisImage = "$pwd/art/" . $card[$elements[$format]['name']];				
+			}
     }
     
 	  if (array_key_exists('v', $options)) {
@@ -195,10 +297,18 @@
       
       // echo "Width: "  . $imgWidth . "\n";
       // echo "Height: " . $imgHeight . "\n";
+			
+			if (array_key_exists('b', $options) && array_key_exists('p', $options)) {
+				$frame_cfg['art']['width']  += 72;
+				$frame_cfg['art']['height'] += 72;
+			}
 
       $artboxRatio = $frame_cfg['art']['width'] / $frame_cfg['art']['height'];
       $thisArtRatio = $imgWidth / $imgHeight;
-    
+			
+			// echo "Art Box Ratio: $artboxRatio \n";
+			// echo "This Art Ratio: $imgWidth / $imgHeight; \n";
+			    
       // Greater width, larger ratio
       // Taller height, smaller ratio
 			
@@ -218,7 +328,12 @@
 				$newY = -($newHeight - $frame_cfg['art']['height']) / 2;
 			}
 			
-			$preparesvg = str_replace('xlink:href="{$thisArt}"', "x=\"" . ($newX + 3) . "\" y=\"" . ($newY + 3) . "\" width=\"$newWidth\" height=\"$newHeight\" xlink:href=\"data:$imgType;base64,$newImage\"", $preparesvg);
+			if (!$card['promo']) {
+				$newX += 3;
+				$newY += 3;
+			}
+			
+			$preparesvg = str_replace('xlink:href="{$thisArt}"', "x=\"" . $newX . "\" y=\"" . $newY . "\" width=\"$newWidth\" height=\"$newHeight\" xlink:href=\"data:$imgType;base64,$newImage\"", $preparesvg);
 		} else {
 			$newImage = base64_encode(file_get_contents('transparent.png'));
 			$preparesvg = str_replace('xlink:href="{$thisArt}"', "xlink:href=\"data:$imgType;base64,$newImage\"", $preparesvg);
@@ -232,9 +347,20 @@
 		}
 				
 	  if (array_key_exists('p', $options)) {
-	  	$preparesvg = str_replace('width="744" height="1039" viewBox="0 0 744 1039" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', 'width="816" height="1110" viewBox="0 0 816 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m0 0h816v1110h-816z" fill="#000"/><g transform="translate(37.5,35.5)">', $preparesvg);
+			if ($card['promo']) {
+		  	$preparesvg = str_replace('width="744" height="1039" viewBox="0 0 744 1039" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', 'width="816" height="1110" viewBox="0 0 816 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', $preparesvg);
+				$preparesvg = str_replace('<mask id="artmask"><path d="m0 0h744v959h-744z"', '<mask id="artmask"><path d="m0 0h816v1031h-816z"', $preparesvg);
+				$preparesvg = preg_replace('/mask="url\(#artmask\)"\/>\s*<\/g>/', 'mask="url(#artmask)"/><g transform="translate(37.5,35.5)">', $preparesvg);
+				$preparesvg = str_lreplace('</svg>', '</g></svg>', $preparesvg);
+			} else {
+		  	$preparesvg = str_replace('width="744" height="1039" viewBox="0 0 744 1039" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', 'width="816" height="1110" viewBox="0 0 816 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m 0h816v1110h-816z" fill="#000"/><g transform="translate(37.5,35.5)">', $preparesvg);
+			}
 			$preparesvg = str_lreplace('</svg>', '</g></svg>', $preparesvg);
+
 			// Move logo up for printing
+		}
+		
+		if (array_key_exists('c', $options)) {
 			$preparesvg = str_replace('"translate(543,990)"', '"translate(543,970)"', $preparesvg);
 			$preparesvg = str_replace('"translate(543,1007)"', '"translate(543,990)"', $preparesvg);
 			$preparesvg = str_replace('"translate(543,1010)"', '"translate(543,990)"', $preparesvg);
@@ -247,12 +373,12 @@
     
 		echo "Exporting frame to PNG (800 DPI)\n";
 		exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 256 -o \"$pwd/output/$thisFile.png\" &>/dev/null");
-		echo "Exporting frame to PNG (300 DPI)\n";
-    exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 96 -o \"$pwd/output/$thisFile 300.png\" &>/dev/null");
+		// echo "Exporting frame to PNG (300 DPI)\n";
+    // exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 96 -o \"$pwd/output/$thisFile 300.png\" &>/dev/null");
 		
 	  if (!array_key_exists('v', $options)) {
 	    exec("convert -density 300 -geometry 1984 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt.png\"");
-	    exec("convert -density 300 -geometry 744 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt 300.png\"");
+	    // exec("convert -density 300 -geometry 744 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt 300.png\"");
 			
 			// If it’s PDF, we need to layer the PDF onto the SVG output
 			
@@ -284,6 +410,8 @@
         $base  = imagecreatetruecolor(744, 1039);
 				$compo = imagecreatetruecolor(744, 1039);
 			}
+			
+			/*
       imagealphablending($compo, true);
       imagesavealpha($compo, true);
       $base  = imagecreatefrompng("$pwd/output/$thisFile 300.png");
@@ -297,16 +425,23 @@
 			
 			imagepng($base, "$pwd/output/$thisFile 300.png");
       imagedestroy($base);
+			*/
 		}
 		
 	  if (!array_key_exists('k', $options)) {
-			unlink("$pwd/output/{$thisFile}_txt 300.png");
+			// unlink("$pwd/output/{$thisFile}_txt 300.png");
+			
 			unlink("$pwd/output/{$thisFile}_txt.pdf");
 			unlink("$pwd/output/{$thisFile}_txt.png");
 			unlink("$pwd/output/{$thisFile}.aux");
 			unlink("$pwd/output/{$thisFile}.log");
 			unlink("$pwd/output/{$thisFile}.svg");
 			unlink("$pwd/output/{$thisFile}.tex");
+			
+		}
+		
+		if ($early_abort) {
+			die;
 		}
   }
 ?>

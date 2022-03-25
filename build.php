@@ -76,9 +76,19 @@
 		'token_small_legendary',
 		'token_small_promo_R',
 		'token_small_R',
-		'token_small'
+		'token_small',
+		'regular_promo',
+		'regular_promo_R',
+		'regular_creature_promo',
+		'regular_creature_promo_R',
+		'regular_multicolor_promo',
+		'regular_multicolor_promo_R',
+		'regular_legendary_multicolor_promo',
+		'regular_legendary_multicolor_promo_R',
+		'regular_creature_legendary_multicolor_promo',
+		'regular_creature_legendary_multicolor_promo_R',
   );
-		      
+			      
   foreach($iniList as $inikey) {
 		echo "$inikey\n";
 		

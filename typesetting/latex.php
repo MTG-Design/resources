@@ -10,9 +10,7 @@ function getFrameImage($cardData, $fmt, $els)
   $color = 'C';
   $frameImage = 'regular';
   $frameIni = 'regular';
-  
-	echo "Format: $fmt\n";
-	
+  	
   if ($fmt == 'LackeyBot') {
     $cardData['color'] = trim(preg_replace('/[\{\}]/', '', $cardData[$els[$fmt]['color']]));
     switch ($cardData['color']) {
@@ -38,10 +36,19 @@ function getFrameImage($cardData, $fmt, $els)
 		if (count($cardData['notes']) && array_key_exists('frameIdentity', $cardData['notes'][0])) {
 			$color = $cardData['notes'][0]['frameIdentity'];
 		}
-  }
+  } else if ($fmt == 'Scryfall') {
+    $color = $cardData['color'] = $cardData[$els[$fmt]['color']];
+		
+		if (!$color) {
+			$color = 'C';
+		}
+		
+		if (($color == 'C') && (stripos($cardData[$els[$fmt]['types']], 'Artifact') !== false)) {
+			$color = 'A';
+		}
+	}
     
   if (stripos($cardData[$els[$fmt]['types']], 'Token') !== false) {
-    //echo "Is there text? " . strlen(trim($cardData[$els[$fmt]['text']])) . "\n";
     if (trim($cardData[$els[$fmt]['text']])) {
       $frameImage = 'token_medium';
       $frameIni = 'token_medium';
@@ -61,6 +68,10 @@ function getFrameImage($cardData, $fmt, $els)
     $isCreature = 'creature';
     $frameIni .= '_creature';
   }
+	
+	if (strlen($color) > 1) {
+		$isMulticolor = 'multicolor';
+	}
 
   if (stripos($cardData[$els[$fmt]['types']], 'Vehicle') !== false) {
     $isVehicle = 'vehicle';
@@ -74,19 +85,24 @@ function getFrameImage($cardData, $fmt, $els)
     $isPlaneswalker = 'planeswalker';
     $frameIni = 'planeswalker';
   }
+		
+	if ($cardData['promo']) {
+		$isPromo = "promo";
+    $frameIni .= '_promo';
+	}
   
   if (in_array(strtoupper($cardData[$els[$fmt]['rarity']][0]), array('R', 'M', 'P', 'S'))) {
     $isRare = 'R';
   }
   
   $recipeIngredients = array('isVehicle', 'isCreature', 'isLand', 'isLegendary', 'isMulticolor', 'isPromo', 'isRare', 'color');
-
+		
   for ($i = 0; $i < count($recipeIngredients); $i++) {
     if (${$recipeIngredients[$i]}) {
       $frameImage .= "_" . ${$recipeIngredients[$i]};
     }
   }
-  
+	  
   return array($frameImage, $frameIni);
 }
 
@@ -96,7 +112,7 @@ function sanitizeText($string)
 	$string = preg_replace('/(?=[\&\%\$\#\_])/', '\\', $string);
 	$string = str_replace('~', '\textasciitilde ', $string);
 	$string = str_replace('^', '\textasciicircum ', $string);
-	$string = preg_replace('/"([^"\n])+"/', '“$1”', $string);
+	$string = preg_replace('/"([^"\n]+)"/', '“$1”', $string);
 	$string = str_replace("\"", "”", $string);
 	$string = str_replace("\'", "’", $string);
 
@@ -110,12 +126,12 @@ function substituteRules($rules)
 	$rules = preg_replace('/\n\s*\*\s+/', '•', trim($rules));
 	
 	$rules = preg_replace('/\*?\(([\S^\)][^\)]*[\S^\)])\)\*?/', '\emph{($1)}' , $rules);
-	$rules = preg_replace('/([\\]emph\{[^\}]*[\.\,\:\;])\s+([TVWY][^\}]*\})/', '$1$2', $rules);
+	$rules = preg_replace('/(\\\emph\{[^\}]*[\.\,\:\;])\s+([TVWY][^\}]*\})/', '$1\hspace{0pt}$2', $rules);
+	$rules = preg_replace('/ ([TVWY])/', '\hspace{-.125em} $1', $rules);
 	$bulletArray = explode('•', $rules);
-	
-	$bulletArray[0] = str_replace("\n", '\vspace{.5\baselineskip}\newline ', trim($bulletArray[0]));
-	
+		
 	if (count($bulletArray) > 1) {
+		$bulletArray[0] = str_replace("\n", '\vspace{.375\baselineskip}\newline ', trim($bulletArray[0]));
 		$items = $bulletArray[0];
 		$items .= '\begin{itemize}[label=\textbullet,leftmargin=*,itemindent=0em,labelsep=0.3em,topsep=0.166666em,parsep=1.375em,partopsep=0em,itemsep=-1.1875em]';
 		for ($i = 1; $i < count($bulletArray); $i++) {
@@ -124,8 +140,9 @@ function substituteRules($rules)
 		$items .= '\end{itemize}';
 		$items = preg_replace('/\\\newline\s*\\\item/','\item', $items);
 		$rules = $items;
-	}
-	
+	} else {
+		$rules = str_replace("\n", '\vspace{.375\baselineskip}\newline ', $bulletArray[0]);
+	}	
 	return trim($rules);
 }
 
@@ -134,9 +151,12 @@ function substituteFlavor($flavor)
 	$flavor = sanitizeText($flavor);
 	$flavor = preg_replace('/^(\*?[“\"”‘\'’TVWY])/', '\hspace+{-.125em}$1', $flavor);
 	$flavor = str_replace("\n", '\newline ', $flavor);
-	
-	$flavor = preg_replace('/\*([^\*]+)\*/', '\emph{$1}', trim($flavor));
+	if (trim($flavor)) {
+		$flavor = '*' . $flavor . '*';
+	}
+	$flavor = preg_replace('/\*+([^\*]+)\*+/', '\emph{$1}', trim($flavor));
 	$flavor = preg_replace('/([\.\,\:\;])\s+([TVWY])/', '$1\hspace{0pt}$2', $flavor);
+	$flavor = preg_replace('/(\w)\'(\w)/', '$1’$2', $flavor);
 	$flavor = str_replace('\hspace+', '\hspace*', $flavor);
 
 	return $flavor;
@@ -154,14 +174,14 @@ function createMana($mana, $shadow = false)
 	foreach ($mana_array as $mana_element) {
 		switch ($mana_element) {
 			case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '10': case '11': case '12': case '13': case '14': case '15': case '16': case '17': case '18': case '19': case '20': case 'C': case 'S': case 'T':
-				        $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{genericmana}{O}' . $mana_element . '}'; break;
-      case 'W': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{whitemana}{O}W}'; break;
-      case 'U': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{bluemana}{O}U}'; break;
-      case 'B': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{blackmana}{O}B}'; break;
-      case 'R': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{redmana}{O}R}'; break;
-      case 'G': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{greenmana}{O}G}'; break;
-      case 'C': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{colorlessmana}{O}C}'; break;
-      case 'S': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{colorlessmana}{O}S}'; break;
+				        $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{genericmana}{O}' . $mana_element . '}}'; break;
+      case 'W': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{whitemana}{O}W}}'; break;
+      case 'U': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{bluemana}{O}\textcolor{black}U}}'; break;
+      case 'B': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{blackmana}{O}B}}'; break;
+      case 'R': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{redmana}{O}R}}'; break;
+      case 'G': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{greenmana}{O}G}}'; break;
+      case 'C': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{colorlessmana}{O}C}}'; break;
+      case 'S': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '{\textcolor{colorlessmana}{O}S}}'; break;
 /*
 			case '{W/P}'
 			case '{W/U}'
@@ -185,6 +205,11 @@ function createManaFromMatches($manaArray)
 	return $mana_match_tex;
 }
 
+function convertToShadowText($cardText)
+{
+	return preg_replace('/color{\w+}/', 'color{black}', $cardText);
+}
+
 function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 {
 	$pwd = exec('pwd');
@@ -202,14 +227,14 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   
   $rarity = strtoupper($cardData[$els[$fmt]['rarity']][0]);
 	
-	if (count($cardData['notes']) && array_key_exists('fontSize', $cardData['notes'][0])) {
+	if (array_key_exists('notes', $cardData) && count($cardData['notes']) && array_key_exists('fontSize', $cardData['notes'][0])) {
 		$cfg['textbox']['size'] = $cardData['notes'][0]['fontSize'];
 	}
-  
+	
 /*  if ($cardData['collector_total']) {
     $cnline = $cardData[$els[$fmt]['number'] . '\kern .25em/\kern .25em ' . $cardData[$els[$fmt]['collector_total'];
   } else {
-*/  $cnline = str_pad($cardData[$els[$fmt]['number']], 3, "0", STR_PAD_LEFT) . '\kern .2em/\kern .2em 256';
+*/  $cnline = str_pad($cardData[$els[$fmt]['number']], 3, "0", STR_PAD_LEFT) . '';
 //}
 
   $cardData['setSymbolWidth'] = 40;
@@ -224,7 +249,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	}
 	
 	$titleColorIfWhite = $titleColor;
-	
+		
 	if (trim(preg_replace('/[\{\}]/', '', $cardData[$els[$fmt]['color']]))[0] == 'W') {
 		if ($cfg['title']['color_if_white']) {
 			$titleColor = $cfg['title']['color_if_white'];
@@ -236,9 +261,15 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	} else if (($titleColor == '#fff') || ($titleColor == 'white')) {
 		$titleColor = 'offwhite';
 	}
-	
+		
 	$text = trim(substituteRules($cardData[$els[$fmt]['text']]));
 	$flavor = trim(substituteFlavor($cardData[$els[$fmt]['flavor']]));
+	
+	$adjust_text = [ 0, 0 ];
+	
+	if ($cardData['promo']) {
+		$adjust_text = [ .3, .3 ];
+	}
 		
   $buffer = '\documentclass{article}
   \usepackage[absolute]{textpos}
@@ -249,6 +280,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \usepackage[none]{hyphenat}
   \usepackage{enumitem}
   \usepackage{graphicx}
+	\usepackage{shadowtext}
   \usepackage{setspace}
 
   \usepackage[
@@ -307,9 +339,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
     Path = fonts/ ,
     BoldFont = *-Bold,
     ItalicFont = *-Italic,
-    UprightFeatures = {Ligatures = NoCommon},
-    BoldFeatures = {Ligatures = NoCommon},
-    ItalicFeatures = {Ligatures = NoCommon},
+    UprightFeatures = {Ligatures = Common},
+    BoldFeatures = {Ligatures = Common},
+    ItalicFeatures = {Ligatures = Common},
     Extension = .otf,
     PunctuationSpace = 0
   ]{PlantinMTPro}
@@ -343,8 +375,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \begin{document}
   \newlength{\titlelength}
   \newlength{\manalength}
-
-  \begin{textblock*}{' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp}(' . ($cfg['title']['x']) . 'bp, ' . $cfg['title']['y'] . 'bp)
+  \newlength{\rulesheight}
+	
+  \begin{textblock*}{' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp}(' . (($cfg['title']['x'] * .10037 ) + $adjust_text[0]) . 'em, ' . (($cfg['title']['y'] * .10037 ) + $adjust_text[1]) . 'em)
   \fontsize{44pt}{44pt}
   \mana
 	\color{' . $titleColor . '}
@@ -363,16 +396,45 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \advance \count255 by -1
   \repeat
   
-  
   \ifnum\count255 >23
-  \begin{' . $cfg['title']['align'] . '}' . 
-  $name . '\strut
+  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}' . $name . '\phantom{’}
   \end{' . $cfg['title']['align'] . '}
   \else
   \relax  
   \fi
 	\end{textblock*}
 	';
+	
+	if ($cardData['promo']) {
+	  $buffer .= '
+		\begin{textblock*}{' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp}(' . $cfg['title']['x'] . 'bp, ' . $cfg['title']['y'] . 'bp)
+	  \fontsize{44pt}{44pt}
+	  \mana
+		\color{' . $titleColor . '}
+	  \selectfont
+	  \settowidth{\manalength}{' . $mana_tex . '\strut}
+
+	  \\' . str_replace(' ', '', strtolower($cfg['title']['font'])) . '
+	  \count255 = ' . $cfg['title']['size'] . '
+
+	  \loop
+	  \fontsize{\count255 pt}{\count255 pt}
+	  \selectfont
+	  \settowidth{\titlelength}{' . $name . '\strut}
+	  \addtolength{\titlelength}{\manalength}
+	  \ifdim \titlelength >' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp
+	  \advance \count255 by -1
+	  \repeat
+  
+	  \ifnum\count255 >23
+	  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\color{offwhite}' . $name . '\phantom{’}
+	  \end{' . $cfg['title']['align'] . '}
+	  \else
+	  \relax  
+	  \fi
+		\end{textblock*}
+		';
+	}
 	
 	if ($cfg['manacost']['align'] == 'right') {
 		$buffer .= '\begin{textblock*}{' . $cfg['manacost']['width'] . 'bp}(' . ($cfg['manacost']['x'] - $cfg['manacost']['width']) . 'bp, ' . $cfg['manacost']['y'] . 'bp)
@@ -384,7 +446,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	';
 	}
 	
-  $buffer .= $mana_tex . '\strut
+  $buffer .= '\color{black}' . $mana_tex . '\strut
 	';
 	if ($cfg['manacost']['align'] == 'right') {
 	  $buffer .= '\end{flushright}
@@ -394,8 +456,10 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   ';
 	}
   $buffer .= '\end{textblock*}
-
-  \begin{textblock*}{' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
+	';
+	
+	$buffer .= '
+  \begin{textblock*}{' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp}(' . (($cfg['typeline']['x'] * .10037) + $adjust_text[0]) . 'em, ' . (($cfg['typeline']['y'] * .10037 ) + $adjust_text[1]) . 'em)
   \beleren
   \selectfont
   \count255 = ' . $cfg['typeline']['size'] . '
@@ -406,17 +470,41 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $sym) . 'bp
   \advance \count255 by -1
   \repeat
-  
-  ' . $types . '\strut
+	\color{black}' . $types . '\phantom{’}
   \end{textblock*}
+	';
 	
-	% Set Symbol
-	\begin{textblock*}{' . $sym . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
-	% \includegraphics{' . $pwd . '/symbol/' . $cardData[$els[$fmt]['set']] . '_' . strtoupper($cardData[$els[$fmt]['rarity']])[0] . '.png} 
-	\end{textblock*}
+	if ($cardData['promo']) {
+		$buffer .= '
+	  \begin{textblock*}{' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
+	  \beleren
+	  \selectfont
+	  \count255 = ' . $cfg['typeline']['size'] . '
+	  \loop
+	  \fontsize{\the\dimexpr(\the\count255 pt)}{' . $cfg['typeline']['size'] . 'pt}
+	  \selectfont
+	  \settowidth{\titlelength}{' . $types . '\strut}
+	  \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $sym) . 'bp
+	  \advance \count255 by -1
+	  \repeat
+		\color{offwhite}' . $types . '\phantom{’}
+	  \end{textblock*}
+		';
+	}
+	
+	// % Set Symbol
+	// % This is done in the SVG now
+	
+	// %\begin{textblock*}{' . $sym . 'bp}(' . $cfg['typeline']['x'] . 'bp, ' . $cfg['typeline']['y'] . 'bp)
+	// % \includegraphics{' . $pwd . '/symbol/' . $cardData[$els[$fmt]['set']] . '_' . strtoupper($cardData[$els[$fmt]['rarity']])[0] . '.png} 
+	// %\end{textblock*}
 
+	
+	$buffer .= '
   % Rules and Flavor Text
-  \newlength{\rulesheight}
+	
+  \begin{textblock*}{' . $cfg['textbox']['width'] . 'bp}[0, 0.5](' . (($cfg['textbox']['x'] * .10037 ) + $adjust_text[0]) . 'em, ' . (($cfg['textbox']['y'] * .10037 ) + $adjust_text[1] + ($cfg['textbox']['height'] / 2 * .10037)) . 'em)
+	
   \count255 = ' . (array_key_exists('size', $cfg['textbox']) ? $cfg['textbox']['size'] : $cfg['defaults']['size']) . '
   \plantin
   \selectfont
@@ -428,7 +516,11 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
   	
   if ($text && $flavor) {
-    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		if (stripos($text, '\item') !== false) {
+	    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		} else {
+	    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+		}
 	} else if ($text && !$flavor) {
 		$buffer .= $text;
   } else if (!$text && $flavor) {
@@ -441,9 +533,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \advance \count255 by -1
   \repeat
 
-  \begin{textblock*}{' . $cfg['textbox']['width'] . 'bp}[0, 0.5](' . $cfg['textbox']['x'] . 'bp, ' . ($cfg['textbox']['y'] + ($cfg['textbox']['height'] / 2)) . 'bp)
-
-  \fontsize{\count255 pt}{\count255 pt}
+	
   \plantin
   \selectfont
 	';
@@ -456,12 +546,17 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 		$textEnd   = '\end{center}';
 	}
 	
-  $buffer .= $textBegin;
-  
+  $buffer .= $textBegin . '\color{black}';
+	$shadow_text = convertToShadowText($text);
+	
   if ($text && $flavor) {
-    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		if (stripos($text, '\item') !== false) {
+	    $buffer .= $shadow_text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		} else {
+	    $buffer .= $shadow_text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+		}
 	} else if ($text && !$flavor) {
-		$buffer .= $text;
+		$buffer .= $shadow_text;
   } else if (!$text && $flavor) {
   	$buffer .= $flavor;
   }
@@ -469,7 +564,72 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   $buffer .= $textEnd . '
   \end{textblock*}
   \setstretch{1.0}';
+		
+	if ($cardData['promo']) {
+		$buffer .= '
+	  % Rules and Flavor Text
+	  \begin{textblock*}{' . $cfg['textbox']['width'] . 'bp}[0, 0.5](' . $cfg['textbox']['x'] . 'bp, ' . ($cfg['textbox']['y'] + ($cfg['textbox']['height'] / 2)) . 'bp)
+
+	  \count255 = ' . (array_key_exists('size', $cfg['textbox']) ? $cfg['textbox']['size'] : $cfg['defaults']['size']) . '
+	  \plantin
+	  \selectfont
+	  \setstretch{0.97}
+
+	  \loop
+	  \fontsize{\count255 pt}{\count255 pt}
+	  \selectfont
+	  \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
+  	
+	  if ($text && $flavor) {
+			if (stripos($text, '\item') !== false) {
+		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+			} else {
+		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+			}
+		} else if ($text && !$flavor) {
+			$buffer .= $text;
+	  } else if (!$text && $flavor) {
+	  	$buffer .= $flavor;
+	  }
   
+	  $buffer .= '\relax
+	  \end{flushleft}}}
+	  \ifdim \rulesheight>' . $cfg['textbox']['height'] . 'bp
+	  \advance \count255 by -1
+	  \repeat
+
+	  \fontsize{\count255 pt}{\count255 pt}
+	  \plantin
+	  \selectfont
+		';
+	
+		$textBegin = '\begin{flushleft}';
+		$textEnd   = '\end{flushleft}';
+	
+		if ($cfg['textbox']['align'] == "center") {
+		  $textBegin = '\begin{center}';
+			$textEnd   = '\end{center}';
+		}
+	
+	  $buffer .= $textBegin . '\color{offwhite}';
+	
+	  if ($text && $flavor) {
+			if (stripos($text, '\item') !== false) {
+		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+			} else {
+		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+			}
+		} else if ($text && !$flavor) {
+			$buffer .= $text;
+	  } else if (!$text && $flavor) {
+	  	$buffer .= $flavor;
+	  }
+  
+	  $buffer .= $textEnd . '
+	  \end{textblock*}
+	  \setstretch{1.0}';
+	}
+	
   if (array_key_exists('power', $cardData) && strlen($cardData['power'])) {
     $buffer .=
   '
@@ -517,7 +677,6 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 		
   if (!array_key_exists('c', $opt)) {
 		$buffer .= '
-  Copyright
   \begin{textblock*}{360bp}(' . ($cfg['copyright']['x'] - 360) . 'bp, ' . ($cfg['copyright']['y']) . 'bp)
   \begin{flushright}
   \fontsize{17pt}{20pt}
@@ -552,7 +711,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \color{offwhite}
   \addfontfeature{LetterSpace=8.0}
   \selectfont
-  ' . $set . ' • EN\strut
+  ' . $set . '\kern .33333333em •\kern .33333333em EN\strut
   \end{flushleft}
   \end{textblock*}
   
