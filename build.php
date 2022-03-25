@@ -59,8 +59,6 @@
 		'token_large_creature',
 		'token_large_R',
 		'token_large',
-		'token_medium_creature_old_R',
-		'token_medium_creature_old',
 		'token_medium_creature_R',
 		'token_medium_creature',
 		'token_medium_R',
