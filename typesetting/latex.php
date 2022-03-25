@@ -547,7 +547,12 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	}
 	
   $buffer .= $textBegin . '\color{black}';
-	$shadow_text = convertToShadowText($text);
+	
+	if ($cardData['promo']) {
+		$shadow_text = convertToShadowText($text);
+	} else {
+		$shadow_text = $text;
+	}
 	
   if ($text && $flavor) {
 		if (stripos($text, '\item') !== false) {

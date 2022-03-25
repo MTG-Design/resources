@@ -139,11 +139,11 @@
 	  $source = json_decode(file_get_contents($options['m']), true);
   } else {
     $format = 'Scryfall';
-		if (file_exists($options['s'])) {
-		  $source = json_decode(file_get_contents($options['s']), true);
+		if (file_exists(getcwd() . "/" . $options['s'] . ".json")) {
+		  $source = json_decode(file_get_contents(getcwd() . "/" . $options['s'] . ".json"), true);
 		} else {
 			$source = json_decode(file_get_contents('https://api.scryfall.com/cards/search?q=' . rawurlencode($options['s'])));
-			$source = ((array)$source)['data'][0];
+			$source = ((array)$source)['data'];
 		}
 	}
 	
@@ -159,7 +159,7 @@
 		$start = 0;
 		$end = count((array)$source);
 	}
-		  
+		
   foreach($source as $card) {
     ++$count;
 		if ($count < $start) {
@@ -168,11 +168,12 @@
 		} else if ($count > $end) {
 			continue;
 		}
-				
+						
 		if (array_key_exists('s', $options)) {
 			if (is_string($card)) {
 				$card = $source;
-				$early_abort = true;				
+				//$early_abort = true;
+				//echo "Early Abort: $early_abort\n"
 			}
 	    $card = array_merge(json_decode(file_get_contents("typesetting/default_" . strtolower($format) . ".json"), true), ((array)$card));			
 			if (count($card['colors']) == 1) {
