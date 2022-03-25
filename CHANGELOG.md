@@ -1,4 +1,10 @@
 # Changelog
+Version 0.3.1
+
+* Fixed an issue with the build script
+* Fixed multicolor promo frames
+* Fixed vehicle frames
+
 Version 0.3
 
 * Added support for command line rendering via Scryfall
