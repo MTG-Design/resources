@@ -13,6 +13,10 @@
   $iniList = array(
 		'regular_land_R',
 		'regular_blank',
+		'regular_artifact_R',
+		'regular_artifact',
+		'regular_artifact_creature_R',
+		'regular_artifact_creature',		
 		'regular_creature_legendary_multicolor_R',
 		'regular_creature_legendary_multicolor',
 		'regular_creature_legendary_R',
@@ -72,9 +76,19 @@
 		'token_small_legendary',
 		'token_small_promo_R',
 		'token_small_R',
-		'token_small'
+		'token_small',
+		'regular_promo',
+		'regular_promo_R',
+		'regular_creature_promo',
+		'regular_creature_promo_R',
+		'regular_multicolor_promo',
+		'regular_multicolor_promo_R',
+		'regular_legendary_multicolor_promo',
+		'regular_legendary_multicolor_promo_R',
+		'regular_creature_legendary_multicolor_promo',
+		'regular_creature_legendary_multicolor_promo_R',
   );
-		      
+			      
   foreach($iniList as $inikey) {
 		echo "$inikey\n";
 		
@@ -110,6 +124,13 @@
           'width' => 'auto',
           'height' => 'auto',      
           'index' => 20,
+        ),
+        'watermark' => array(
+          'x' => 0,
+          'y' => 0,
+          'width' => 'auto',
+          'height' => 'auto',      
+          'index' => 30,
         ),
         'accent1' => array(
           'x' => 0,
@@ -241,7 +262,7 @@
         ),
 				'logo' => array(
 					'x' => 543,
-					'y' => 1006,
+					'y' => 1007,
 					'align' => 'left',
 					'file' => 'border/bumper.svg',
 					'index' => 990,
