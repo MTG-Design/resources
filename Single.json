@@ -1,0 +1,27 @@
+{
+  "Goat_TKN_LDO": {
+    "fullName": "Season of Renewal",
+    "cardName": "Season of Renewal",
+    "manaCost": "{2}{G}",
+    "typeLine": "Instant",
+    "rarityLine": "*Common*",
+		"rulesText": "Choose one or both —\n• Return target creature card from your graveyard to your hand.\n• Return target enchantment card from your graveyard to your hand.",
+    "flavorText": "*Pavement ripped like paper as the ancient kami awoke from her long slumber beneath the city.*",
+    "power": "",
+    "toughness": "",
+    "loyalty": "",
+    "color": "{Green} ",
+    "cmc": 0,
+    "cardType": "Creature",
+    "rarity": "Common",
+    "shape": "normal",
+    "setID": "NEO",
+    "cardID": "205",
+    "designer": "",
+    "script": "",
+    "notes": [
+
+    ],
+    "artist": "Rovina Cai"
+	}
+}

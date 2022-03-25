@@ -26,9 +26,18 @@ function getFrameImage($cardData, $fmt, $els)
       break;
       case 'Green': $color = 'G';
       break;
+      case 'Multicolor': $color = 'M';
+      break;
       default:      $color = 'C';
     }
-		echo "Color: $color\n";
+		
+		if (($color == 'C') && (stripos($cardData[$els[$fmt]['types']], 'Artifact') !== false)) {
+			$color = 'A';
+		}
+		
+		if (count($cardData['notes']) && array_key_exists('frameIdentity', $cardData['notes'][0])) {
+			$color = $cardData['notes'][0]['frameIdentity'];
+		}
   }
     
   if (stripos($cardData[$els[$fmt]['types']], 'Token') !== false) {
@@ -84,52 +93,75 @@ function getFrameImage($cardData, $fmt, $els)
 function sanitizeText($string)
 {
 	//$string = str_replace('\\', '\textbackslash ', $string);
-	$string = preg_replace('/(?=[\&\%\$\#\_\{\}])/', '\\', $string);
+	$string = preg_replace('/(?=[\&\%\$\#\_])/', '\\', $string);
 	$string = str_replace('~', '\textasciitilde ', $string);
 	$string = str_replace('^', '\textasciicircum ', $string);
+	$string = preg_replace('/"([^"\n])+"/', '“$1”', $string);
+	$string = str_replace("\"", "”", $string);
+	$string = str_replace("\'", "’", $string);
 
 	return trim($string);
 }
 
 function substituteRules($rules)
 {
-	//$rules = str_replace('\\\\', '\n', $rules);
-	$rules = str_replace("'", "’", $rules);
+	$rules = preg_replace_callback('/\{([1-9]*|[0-9BCGPQRSTUWXYZ]([\/][0-9BCGPQRSTUWXYZ]?)?+)\}/', 'createManaFromMatches', $rules);	
 	$rules = sanitizeText($rules);
-	$rules = str_replace("\n", '\vspace{.5\baselineskip}\newline ', $rules);
-	$rules = preg_replace('/\(([\S^\)][^\)]*[\S^\)])\)/', '\emph{($1)}' , $rules);
-	$rules = preg_replace('/\*([^\*]+)\*/', '\emph{$1}', $rules);
+	$rules = preg_replace('/\n\s*\*\s+/', '•', trim($rules));
+	
+	$rules = preg_replace('/\*?\(([\S^\)][^\)]*[\S^\)])\)\*?/', '\emph{($1)}' , $rules);
+	$rules = preg_replace('/([\\]emph\{[^\}]*[\.\,\:\;])\s+([TVWY][^\}]*\})/', '$1$2', $rules);
+	$bulletArray = explode('•', $rules);
+	
+	$bulletArray[0] = str_replace("\n", '\vspace{.5\baselineskip}\newline ', trim($bulletArray[0]));
+	
+	if (count($bulletArray) > 1) {
+		$items = $bulletArray[0];
+		$items .= '\begin{itemize}[label=\textbullet,leftmargin=*,itemindent=0em,labelsep=0.3em,topsep=0.166666em,parsep=1.375em,partopsep=0em,itemsep=-1.1875em]';
+		for ($i = 1; $i < count($bulletArray); $i++) {
+			$items .= '\item ' . $bulletArray[$i];
+		}
+		$items .= '\end{itemize}';
+		$items = preg_replace('/\\\newline\s*\\\item/','\item', $items);
+		$rules = $items;
+	}
 	
 	return trim($rules);
 }
 
 function substituteFlavor($flavor)
 {
-	//$flavor = str_replace('\\\\', '\n', $flavor);
 	$flavor = sanitizeText($flavor);
+	$flavor = preg_replace('/^(\*?[“\"”‘\'’TVWY])/', '\hspace+{-.125em}$1', $flavor);
 	$flavor = str_replace("\n", '\newline ', $flavor);
+	
 	$flavor = preg_replace('/\*([^\*]+)\*/', '\emph{$1}', trim($flavor));
+	$flavor = preg_replace('/([\.\,\:\;])\s+([TVWY])/', '$1\hspace{0pt}$2', $flavor);
+	$flavor = str_replace('\hspace+', '\hspace*', $flavor);
 
 	return $flavor;
 }
 
-
-function createMana($mana)
+function createMana($mana, $shadow = false)
 {
 	$mana_array = preg_split("/[\{\}\(\)\[\]]+/", $mana, 0, PREG_SPLIT_NO_EMPTY);
-	$mana_tex = '';
+	$mana_tex = $shadow_tex = '';
+		
+	if ($shadow) {
+		$shadow_tex = '\fontsize{44pt}{44pt}\selectfont\textcolor{black}{\kern-1pt\raisebox{-3.5pt}{O}\kern 1pt}';	
+	}
 	
 	foreach ($mana_array as $mana_element) {
 		switch ($mana_element) {
 			case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': case '10': case '11': case '12': case '13': case '14': case '15': case '16': case '17': case '18': case '19': case '20': case 'C': case 'S': case 'T':
-				        $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{genericmana}{O}' . $mana_element; break;
-      case 'W': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{whitemana}{O}W'; break;
-      case 'U': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{bluemana}{O}U'; break;
-      case 'B': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{blackmana}{O}B'; break;
-      case 'R': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{redmana}{O}R'; break;
-      case 'G': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{greenmana}{O}G'; break;
-      case 'C': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{colorlessmana}{O}C'; break;
-      case 'S': $mana_tex .= '\fontsize{44pt}{44pt}\mana\selectfont\textcolor{black}{\raisebox{-3.5pt}{O}}\kern 1pt\textcolor{colorlessmana}{O}S'; break;
+				        $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{genericmana}{O}' . $mana_element . '}'; break;
+      case 'W': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{whitemana}{O}W}'; break;
+      case 'U': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{bluemana}{O}U}'; break;
+      case 'B': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{blackmana}{O}B}'; break;
+      case 'R': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{redmana}{O}R}'; break;
+      case 'G': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{greenmana}{O}G}'; break;
+      case 'C': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{colorlessmana}{O}C}'; break;
+      case 'S': $mana_tex .= '{\mana\selectfont' . $shadow_tex . '\textcolor{colorlessmana}{O}S}'; break;
 /*
 			case '{W/P}'
 			case '{W/U}'
@@ -142,11 +174,22 @@ function createMana($mana)
 	return $mana_tex;
 }
 
+function createManaFromMatches($manaArray)
+{
+	$mana_match_tex = '';
+
+	for($i = 1; $i < count($manaArray); $i++) {
+		$mana_match_tex .= createMana($manaArray[$i]);
+	}
+	
+	return $mana_match_tex;
+}
+
 function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 {
 	$pwd = exec('pwd');
 	
-	$mana_tex = createMana($cardData[$els[$fmt]['manacost']]);
+	$mana_tex = createMana($cardData[$els[$fmt]['manacost']], true);
 	
   $name   = preg_replace('/([fhkmn]) /', '\alt{' . "$1" . '} ', $cardData[$els[$fmt]['name']] . ' ');
 	$name   = fixContextualAlternates($cardData[$els[$fmt]['name']]);
@@ -157,12 +200,16 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	
   $set    = strtoupper($cardData[$els[$fmt]['set']]);
   
-  $rarity = (strtoupper($cardData[$els[$fmt]['rarity']][0]));
+  $rarity = strtoupper($cardData[$els[$fmt]['rarity']][0]);
+	
+	if (count($cardData['notes']) && array_key_exists('fontSize', $cardData['notes'][0])) {
+		$cfg['textbox']['size'] = $cardData['notes'][0]['fontSize'];
+	}
   
 /*  if ($cardData['collector_total']) {
     $cnline = $cardData[$els[$fmt]['number'] . '\kern .25em/\kern .25em ' . $cardData[$els[$fmt]['collector_total'];
   } else {
-*/  $cnline = $cardData[$els[$fmt]['number']];
+*/  $cnline = str_pad($cardData[$els[$fmt]['number']], 3, "0", STR_PAD_LEFT) . '\kern .2em/\kern .2em 256';
 //}
 
   $cardData['setSymbolWidth'] = 40;
@@ -189,7 +236,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	} else if (($titleColor == '#fff') || ($titleColor == 'white')) {
 		$titleColor = 'offwhite';
 	}
-		
+	
 	$text = trim(substituteRules($cardData[$els[$fmt]['text']]));
 	$flavor = trim(substituteFlavor($cardData[$els[$fmt]['flavor']]));
 		
@@ -379,9 +426,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \fontsize{\count255 pt}{\count255 pt}
   \selectfont
   \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
-  
+  	
   if ($text && $flavor) {
-    $buffer .= $text . '\relax\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 	} else if ($text && !$flavor) {
 		$buffer .= $text;
   } else if (!$text && $flavor) {
@@ -412,7 +459,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   $buffer .= $textBegin;
   
   if ($text && $flavor) {
-    $buffer .= $text . '\relax\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 	} else if ($text && !$flavor) {
 		$buffer .= $text;
   } else if (!$text && $flavor) {
@@ -423,7 +470,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \end{textblock*}
   \setstretch{1.0}';
   
-  if (array_key_exists('power', $cardData) && $cardData['power']) {
+  if (array_key_exists('power', $cardData) && strlen($cardData['power'])) {
     $buffer .=
   '
   % Power & Toughness
@@ -443,16 +490,16 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   % Artist
   \begin{textblock*}{444bp}(' . $cfg['artist']['x'] . 'bp, ' . $cfg['artist']['y'] . 'bp)
   \begin{flushleft}
-  \fontsize{21pt}{21pt}
+  \fontsize{22pt}{22pt}
   \mana
   \color{offwhite}
   \selectfont
-  a
+	a
   \belerensmallcaps
-  \fontsize{18.5pt}{21pt}
+  \fontsize{' . $cfg['artist']['size'] . 'pt}{' . $cfg['artist']['size'] . 'pt}
   \selectfont
   \kern-7bp
-  ' . sanitizeText($cardData[$els[$fmt]['artist']]) . '
+  ' . sanitizeText($cardData[$els[$fmt]['artist']]) . '\strut
   \end{flushleft}
   \end{textblock*}
 

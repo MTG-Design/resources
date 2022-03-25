@@ -13,6 +13,10 @@
   $iniList = array(
 		'regular_land_R',
 		'regular_blank',
+		'regular_artifact_R',
+		'regular_artifact',
+		'regular_artifact_creature_R',
+		'regular_artifact_creature',		
 		'regular_creature_legendary_multicolor_R',
 		'regular_creature_legendary_multicolor',
 		'regular_creature_legendary_R',
@@ -110,6 +114,13 @@
           'width' => 'auto',
           'height' => 'auto',      
           'index' => 20,
+        ),
+        'watermark' => array(
+          'x' => 0,
+          'y' => 0,
+          'width' => 'auto',
+          'height' => 'auto',      
+          'index' => 30,
         ),
         'accent1' => array(
           'x' => 0,
@@ -241,7 +252,7 @@
         ),
 				'logo' => array(
 					'x' => 543,
-					'y' => 1006,
+					'y' => 1007,
 					'align' => 'left',
 					'file' => 'border/bumper.svg',
 					'index' => 990,

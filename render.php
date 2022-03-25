@@ -38,7 +38,8 @@
       'artist' => 'artist',
       'designer' => 'designer',
       'set' => 'setID',
-      'number' => 'cardID'
+      'number' => 'cardID',
+			'watermark' => 'watermark',
     ),
     'Scryfall' => array(
       'name' => 'name',
@@ -54,6 +55,7 @@
       'artist' => 'artist',
       'set' => 'setCode',
       'language' => 'lang',
+			'watermark' => 'watermark',
     ),
     'MTGJSON' => array(
       'name' => 'name',
@@ -68,7 +70,8 @@
       'loyalty' => 'loyalty',
       'artist' => 'artist',
       'set' => 'set',
-      'language' => 'lang'
+      'language' => 'lang',
+			'watermark' => 'watermark',
     )
   );
   
@@ -83,16 +86,25 @@
 	  $source = json_decode(file_get_contents($options['y']), true);
 	}
 	
-  $start = $count = 0;
+  $start = $end = $count = 0;
 	  
 	if (array_key_exists('n', $options)) {
-	  $start = $options['n'];
+		$start_range = explode('-', $options['n']);
+		$start = $end = $start_range[0];
+		if (count($start_range) > 1) {
+			$end = $start_range[1];
+		}
+	} else {
+		$start = 0;
+		$end = count($source);
 	}
-  
+		  
   foreach($source as $card) {
     ++$count;
 		if ($count < $start) {
 			$filenames[] = "";
+			continue;
+		} else if ($count > $end) {
 			continue;
 		}
     
@@ -103,20 +115,24 @@
 			$card[$elements[$format]['designer']] = $options['d'];
 		}
 
-    echo "Frame Image: $frameImage\n";
-    echo "Frame ini File: $frame_ini\n";
+    //echo "Frame Image: $frameImage\n";
+    //echo "Frame ini File: $frame_ini\n";
     
     $recipe  = "frame/$frameImage.svg";
     $textcfg  = parse_ini_file("typesetting/$frame_ini.ini", true);
     $frame_cfg = parse_ini_file("frame/$frame_ini.ini", true);
-  
-    echo $card[$elements[$format]['name']] . "\n" . $card[$elements[$format]['types']] . "\n";
+		
+    echo $card[$elements[$format]['name']] . "\n";
     $filenames[] = "$count {$card[$elements[$format]['name']]}";
     $thisFile = $filenames[$count - 1];
 		
+		if ($card[$elements[$format]['rarity']] == 'basic land') {
+			$card[$elements[$format]['rarity']] = 'land';
+		}
+		
 		// Put symbol into file
 		$symbolPath = $pwd . '/symbol/' . $card[$elements[$format]['set']] . '_' . strtoupper($card[$elements[$format]['rarity']])[0];
-				
+		
 		if (!file_exists("$symbolPath.png")) {
 			$symbolPath = $pwd . '/symbol/SET_' . strtoupper($card[$elements[$format]['rarity']])[0];
 		}
@@ -125,13 +141,19 @@
 		$newSymbolHeight = 64;
 		$imgSymbolHeightRatio = ($newSymbolHeight / $imgSymbolHeight);
 		$newSymbolWidth = ($imgSymbolWidth * $imgSymbolHeightRatio);
-  
+		
+		if (array_key_exists('c', $options)) {
+			$textcfg['designer']['y'] -= 10;
+		} else {
+			$textcfg['designer']['y'] += 8;			
+		}
+		
     file_put_contents("$pwd/output/$thisFile.tex", createTeX($card, $format, $elements, $textcfg, $newSymbolWidth, $options));
         
     if ($format == 'Scryfall') {
       $thisImage = $card['image_uris']['art_crop'];
     } else {  
-      $thisImage = "$pwd/art/" . $card[$elements[$format]['name']] . ".jpg";
+      $thisImage = "$pwd/art/" . $card[$elements[$format]['name']];
     }
     
 	  if (array_key_exists('v', $options)) {
@@ -150,8 +172,13 @@
 		}
 		
     $preparesvg = str_lreplace("</svg>", "", $preparesvg) . "<image x=\"" . ($textcfg['symbol']['x'] - $newSymbolWidth) . "\" y=\"" . $textcfg['symbol']['y'] . "\" width=\"$newSymbolWidth\" height=\"$newSymbolHeight\" xlink:href=\"data:image/png;base64," . $symbolData . "\"/></svg>";
-		
-    if (file_exists($thisImage)) {
+					
+    if (glob("$thisImage.*")) {
+			if (file_exists($thisImage . ".jpg")) { $thisImage .= ".jpg"; }
+			else if (file_exists("$thisImage.jpeg")) { $thisImage .= ".jpg"; }
+			else if (file_exists("$thisImage.png")) { $thisImage .= ".png"; }
+			else { continue; }
+				
       list($imgWidth, $imgHeight, $imgType, $imgAttr) = getimagesize($thisImage);
       
       $imgType = image_type_to_mime_type($imgType);
@@ -166,8 +193,8 @@
           $imgExtension = 'JPEG';
       }
       
-      echo "Width: "  . $imgWidth . "\n";
-      echo "Height: " . $imgHeight . "\n";
+      // echo "Width: "  . $imgWidth . "\n";
+      // echo "Height: " . $imgHeight . "\n";
 
       $artboxRatio = $frame_cfg['art']['width'] / $frame_cfg['art']['height'];
       $thisArtRatio = $imgWidth / $imgHeight;
@@ -197,18 +224,31 @@
 			$preparesvg = str_replace('xlink:href="{$thisArt}"', "xlink:href=\"data:$imgType;base64,$newImage\"", $preparesvg);
 		}
 		
+		// Watermark
+		$land_types = ['plains', 'island', 'swamp', 'mountain', 'forest', 'wastes'];
+		$land_key = ['plains' => 'W', 'island' =>'U', 'swamp' => 'B', 'mountain' => 'R', 'forest' => 'G', 'wastes' => 'C'];
+		if (in_array(strtolower($card[$elements[$format]['name']]), $land_types)) {
+			$preparesvg = str_replace('<image id="wm" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="/>', '<image id="wm" width="' . $frame_cfg['watermark']['width'] . '" height="' . $frame_cfg['watermark']['height'] . '" xlink:href="data:image/png;base64,' . base64_encode(file_get_contents($pwd . '/watermark/land/' . $land_key[strtolower($card[$elements[$format]['name']])] . '.png')) . '"/>', $preparesvg);
+		}
+				
 	  if (array_key_exists('p', $options)) {
 	  	$preparesvg = str_replace('width="744" height="1039" viewBox="0 0 744 1039" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', 'width="816" height="1110" viewBox="0 0 816 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m0 0h816v1110h-816z" fill="#000"/><g transform="translate(37.5,35.5)">', $preparesvg);
 			$preparesvg = str_lreplace('</svg>', '</g></svg>', $preparesvg);
 			// Move logo up for printing
-			$preparesvg = str_replace('"translate(543,1006)"', '"translate(543,986)"', $preparesvg);
+			$preparesvg = str_replace('"translate(543,990)"', '"translate(543,970)"', $preparesvg);
+			$preparesvg = str_replace('"translate(543,1007)"', '"translate(543,990)"', $preparesvg);
+			$preparesvg = str_replace('"translate(543,1010)"', '"translate(543,990)"', $preparesvg);
 		}
 				
     file_put_contents("$pwd/output/$thisFile.svg", $preparesvg);
-		    
-    exec("inkscape -p \"$pwd/output/$thisFile.svg\" --export-pdf-version=1.4 --batch-process -o \"$pwd/output/$thisFile.pdf\"");
-    exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 256 -o \"$pwd/output/$thisFile.png\"");
-    exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 96 -o \"$pwd/output/$thisFile 300.png\"");
+		
+		// echo "Exporting frame to PDF"
+    // exec("inkscape -p \"$pwd/output/$thisFile.svg\" --export-pdf-version=1.4 --batch-process -o \"$pwd/output/$thisFile.pdf\" &>/dev/null");
+    
+		echo "Exporting frame to PNG (800 DPI)\n";
+		exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 256 -o \"$pwd/output/$thisFile.png\" &>/dev/null");
+		echo "Exporting frame to PNG (300 DPI)\n";
+    exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 96 -o \"$pwd/output/$thisFile 300.png\" &>/dev/null");
 		
 	  if (!array_key_exists('v', $options)) {
 	    exec("convert -density 300 -geometry 1984 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt.png\"");
@@ -265,7 +305,7 @@
 			unlink("$pwd/output/{$thisFile}_txt.png");
 			unlink("$pwd/output/{$thisFile}.aux");
 			unlink("$pwd/output/{$thisFile}.log");
-			unlink("$pwd/output/{$thisFile}.pdf");
+			unlink("$pwd/output/{$thisFile}.svg");
 			unlink("$pwd/output/{$thisFile}.tex");
 		}
   }
