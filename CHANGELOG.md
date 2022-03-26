@@ -1,4 +1,8 @@
 # Changelog
+Version 0.3.2
+
+* Added support for multiple cards via Scryfall queries
+
 Version 0.3.1
 
 * Fixed an issue with the build script
