@@ -63,7 +63,7 @@
 	
   include("typesetting/latex.php");
   
-  $options = getopt("a:d:e:l:m:n:s:z:bchkprv", array("help"));
+  $options = getopt("a:d:e:f:i:l:m:n:s:u:z:bchkprv", array("help", "for-sale", "logo"));
   
   if (!$options || array_key_exists('h', $options) || array_key_exists('help', $options)) {
 	  die("usage: render.php <format> [<options>] <path>\n\nFormats:\n  -l\tLackeyBot JSON format\n  -m\tMTGJSON JSON format (Not finished)\n  -s\tScryfall JSON format (Not finished)\n\nOptions:\n  -a\tArtist override\n  -b\tBorderless promo frame\n  -c\tRemove copyright line\n  -d\tAdd text for designer field to each card\n  -e\tSet override\n  -h\tDisplays this usage description\n  -k\tKeep intermediate and temporary render files\n  -n\tRender a specific card or range of cards (using a hyphen)\n  -p\tOutput as print ready (With bleed area)\n  -r\tDon’t print reminder text\n  -v\tOutput as SVG instead of PDF (No flavor bar or graphics)\n  -z\tMax text size override (an integer, 18-38)\n\n");
@@ -172,7 +172,7 @@
 		if (array_key_exists('s', $options)) {
 			if (is_string($card)) {
 				$card = $source;
-				//$early_abort = true;
+				$early_abort = true;
 				//echo "Early Abort: $early_abort\n"
 			}
 	    $card = array_merge(json_decode(file_get_contents("typesetting/default_" . strtolower($format) . ".json"), true), ((array)$card));			
@@ -208,6 +208,7 @@
 		
 		if (array_key_exists('a', $options)) { $card[$elements[$format]['artist']] = $options['a']; }
 		if (array_key_exists('d', $options)) { $card[$elements[$format]['designer']] = $options['d']; }
+		if (array_key_exists('f', $options)) { $card[$elements[$format]['flavor']] = $options['f']; }
 		if (array_key_exists('e', $options)) { $card[$elements[$format]['set']] = strtoupper($options['e']); }
 		if (array_key_exists('z', $options)) { $textcfg['textbox']['size'] = $options['z']; }
 
@@ -240,6 +241,10 @@
 			$textcfg['designer']['y'] -= 10;
 		} else {
 			$textcfg['designer']['y'] += 8;			
+		}
+		
+		if (array_key_exists('u', $options)) {
+			$card[$elements[$format]['number']] = $options['u'];
 		}
 		
     file_put_contents("$pwd/output/$thisFile.tex", createTeX($card, $format, $elements, $textcfg, $newSymbolWidth, $options));
@@ -299,9 +304,17 @@
       // echo "Width: "  . $imgWidth . "\n";
       // echo "Height: " . $imgHeight . "\n";
 			
+			$image_offset = [0, 0];
+
+		  if (array_key_exists('i', $options)) {
+				$io = explode(',', $options['i']);
+				$image_offset[0] = $io[0];
+				$image_offset[1] = $io[1];
+			}
+			
 			if (array_key_exists('b', $options) && array_key_exists('p', $options)) {
-				$frame_cfg['art']['width']  += 72;
-				$frame_cfg['art']['height'] += 72;
+				$frame_cfg['art']['width']  += 72 + $image_offset[0];
+				$frame_cfg['art']['height'] += 72 + $image_offset[1];
 			}
 
       $artboxRatio = $frame_cfg['art']['width'] / $frame_cfg['art']['height'];
@@ -319,14 +332,14 @@
 				// Wider
 				$newWidth  = ($frame_cfg['art']['height'] / $imgHeight * $imgWidth);
 				$newHeight = $frame_cfg['art']['height'];
-				$newX = -($newWidth - $frame_cfg['art']['width']) / 2;
+				$newX = (($newWidth - $frame_cfg['art']['width']) / -2) + $image_offset[0];
 				$newY = 0;
 			} else {
 				// Taller
 				$newWidth  = $frame_cfg['art']['width'];
 				$newHeight = ($frame_cfg['art']['width'] / $imgWidth * $imgHeight);
 				$newX = 0;
-				$newY = -($newHeight - $frame_cfg['art']['height']) / 2;
+				$newY = (($newHeight - $frame_cfg['art']['height']) / -2) + $image_offset[1];
 			}
 			
 			if (!$card['promo']) {
@@ -363,7 +376,8 @@
 		
 		if (array_key_exists('c', $options)) {
 			$preparesvg = str_replace('"translate(543,990)"', '"translate(543,970)"', $preparesvg);
-			$preparesvg = str_replace('"translate(543,1007)"', '"translate(543,990)"', $preparesvg);
+			$preparesvg = str_replace('"translate(543,1006)"', '"translate(543,986)"', $preparesvg);
+			$preparesvg = str_replace('"translate(543,1007)"', '"translate(543,986)"', $preparesvg);
 			$preparesvg = str_replace('"translate(543,1010)"', '"translate(543,990)"', $preparesvg);
 		}
 				

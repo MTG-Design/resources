@@ -85,6 +85,10 @@
 		'regular_legendary_multicolor_promo_R',
 		'regular_creature_legendary_multicolor_promo',
 		'regular_creature_legendary_multicolor_promo_R',
+		'regular_land_legendary_promo',
+		'regular_land_legendary_multicolor_promo_R',
+		'regular_land_legendary_multicolor_promo',
+		'regular_land_legendary_promo_R',
   );
 			      
   foreach($iniList as $inikey) {

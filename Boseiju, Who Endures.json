@@ -1,0 +1,134 @@
+{
+  "object": "card",
+  "id": "2135ac5a-187b-4dc9-8f82-34e8d1603416",
+  "oracle_id": "bf1341dd-41a3-49f6-87ec-63170dde4324",
+  "multiverse_ids": [
+    548579
+  ],
+  "mtgo_id": 97482,
+  "arena_id": 79706,
+  "tcgplayer_id": 262050,
+  "cardmarket_id": 607040,
+  "name": "Boseiju, Who Endures",
+  "lang": "en",
+  "released_at": "2022-02-18",
+  "uri": "https://api.scryfall.com/cards/2135ac5a-187b-4dc9-8f82-34e8d1603416",
+  "scryfall_uri": "https://scryfall.com/card/neo/266/boseiju-who-endures?utm_source=api",
+  "layout": "normal",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_uris": {
+    "small": "https://c1.scryfall.com/file/scryfall-cards/small/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1643517667",
+    "normal": "https://c1.scryfall.com/file/scryfall-cards/normal/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1643517667",
+    "large": "https://c1.scryfall.com/file/scryfall-cards/large/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1643517667",
+    "png": "https://c1.scryfall.com/file/scryfall-cards/png/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.png?1643517667",
+    "art_crop": "https://c1.scryfall.com/file/scryfall-cards/art_crop/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1643517667",
+    "border_crop": "https://c1.scryfall.com/file/scryfall-cards/border_crop/front/2/1/2135ac5a-187b-4dc9-8f82-34e8d1603416.jpg?1643517667"
+  },
+  "mana_cost": "",
+  "cmc": 0.0,
+  "type_line": "Legendary Land",
+  "oracle_text": "{T}: Add {G}.\nChannel — {1}{G}, Discard Boseiju, Who Endures: Destroy target artifact, enchantment, or nonbasic land an opponent controls. That player may search their library for a land\\\\ card with a basic land type, put it onto the battlefield, then shuffle. This ability costs {1}\\\\ less to activate for each legendary creature\\\\ you control.",
+  "colors": [
+
+  ],
+  "color_identity": [
+    "G"
+  ],
+  "keywords": [
+    "Channel"
+  ],
+  "produced_mana": [
+    "G"
+  ],
+  "legalities": {
+    "standard": "legal",
+    "future": "legal",
+    "historic": "legal",
+    "gladiator": "legal",
+    "pioneer": "legal",
+    "modern": "legal",
+    "legacy": "legal",
+    "pauper": "not_legal",
+    "vintage": "legal",
+    "penny": "not_legal",
+    "commander": "legal",
+    "brawl": "legal",
+    "historicbrawl": "legal",
+    "alchemy": "legal",
+    "paupercommander": "not_legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal"
+  },
+  "games": [
+    "paper",
+    "mtgo",
+    "arena"
+  ],
+  "reserved": false,
+  "foil": true,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil",
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": false,
+  "variation": false,
+  "set_id": "59a2059f-5482-433f-8761-eb2e17859b71",
+  "set": "neo",
+  "set_name": "Kamigawa: Neon Dynasty",
+  "set_type": "expansion",
+  "set_uri": "https://api.scryfall.com/sets/59a2059f-5482-433f-8761-eb2e17859b71",
+  "set_search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Aneo&unique=prints",
+  "scryfall_set_uri": "https://scryfall.com/sets/neo?utm_source=api",
+  "rulings_uri": "https://api.scryfall.com/cards/2135ac5a-187b-4dc9-8f82-34e8d1603416/rulings",
+  "prints_search_uri": "https://api.scryfall.com/cards/search?order=released&q=oracleid%3Abf1341dd-41a3-49f6-87ec-63170dde4324&unique=prints",
+  "collector_number": "266",
+  "digital": false,
+  "rarity": "rare",
+  "card_back_id": "0aeebaf5-8c7d-4636-9e82-8c27447861f7",
+  "artist": "Chris Ostrowski",
+  "artist_ids": [
+    "b5f1bd34-abee-40c9-99f7-a6ee089fb30b"
+  ],
+  "illustration_id": "fecffc00-411c-4e85-b595-2ca0e4cb672b",
+  "border_color": "black",
+  "frame": "2015",
+  "frame_effects": [
+    "legendary"
+  ],
+  "security_stamp": "oval",
+  "full_art": false,
+  "textless": false,
+  "booster": true,
+  "story_spotlight": false,
+  "edhrec_rank": 1419,
+  "preview": {
+    "source": "Wizards of the Coast",
+    "source_uri": "https://www.twitch.tv/videos/1277767538",
+    "previewed_at": "2022-01-27"
+  },
+  "prices": {
+    "usd": "25.18",
+    "usd_foil": "25.53",
+    "usd_etched": null,
+    "eur": "26.76",
+    "eur_foil": "33.83",
+    "tix": "29.97"
+  },
+  "related_uris": {
+    "gatherer": "https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=548579",
+    "tcgplayer_infinite_articles": "https://infinite.tcgplayer.com/search?contentMode=article&game=magic&partner=scryfall&q=Boseiju%2C+Who+Endures&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+    "tcgplayer_infinite_decks": "https://infinite.tcgplayer.com/search?contentMode=deck&game=magic&partner=scryfall&q=Boseiju%2C+Who+Endures&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+    "edhrec": "https://edhrec.com/route/?cc=Boseiju%2C+Who+Endures",
+    "mtgtop8": "https://mtgtop8.com/search?MD_check=1&SB_check=1&cards=Boseiju%2C+Who+Endures"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://www.tcgplayer.com/product/262050?page=1&utm_campaign=affiliate&utm_medium=api&utm_source=scryfall",
+    "cardmarket": "https://www.cardmarket.com/en/Magic/Products/Search?referrer=scryfall&searchString=Boseiju%2C+Who+Endures&utm_campaign=card_prices&utm_medium=text&utm_source=scryfall",
+    "cardhoarder": "https://www.cardhoarder.com/cards/97482?affiliate_id=scryfall&ref=card-profile&utm_campaign=affiliate&utm_medium=card&utm_source=scryfall"
+  }
+}
