@@ -127,14 +127,15 @@ function substituteRules($rules)
 {
 	$rules = preg_replace_callback('/\{([1-9]*|[0-9BCGPQRSTUWXYZ]([\/][0-9BCGPQRSTUWXYZ]?)?+)\}/', 'createManaFromMatches', $rules);	
 	$rules = sanitizeText($rules);
-	$rules = preg_replace('/\n\s*\*\s+/', '•', trim($rules));
-	
-	$rules = preg_replace('/\*?\(([\S^\)][^\)]*[\S^\)])\)\*?/', '\emph{($1)}', $rules);
-	$rules = preg_replace('/(\\\emph\{[^\}]*[\.\,\:\;])\s+([TVWY][^\}]*\})/', '$1\hspace{0pt}$2', $rules);
-	$rules = preg_replace('/([^\n]+)(—\s*[^\n]+$)/', '\emph{$1}$2', $rules);
-	$rules = preg_replace('/ ([TVWY])/', '\hspace{-.125em} $1', $rules);
-	$rules = preg_replace('/(\w)\'(\w)/', '$1’$2', $rules);
+	$rules = preg_replace('/\n\s*\*\s+/', '•', trim($rules));	
 	$bulletArray = explode('•', $rules);
+	$extra_text = '';
+	
+	if (stripos(end($bulletArray), "\n") !== false) {
+		$last_item = explode("\n", end($bulletArray));
+		$bulletArray[count($bulletArray) -1] = $last_item[0];
+		$extra_text = $last_item[1];
+	}
 		
 	if (count($bulletArray) > 1) {
 		$bulletArray[0] = str_replace("\n", '\vspace{.375\baselineskip}\newline ', trim($bulletArray[0]));
@@ -145,10 +146,18 @@ function substituteRules($rules)
 		}
 		$items .= '\end{itemize}';
 		$items = preg_replace('/\\\newline\s*\\\item/','\item', $items);
-		$rules = $items;
+		$rules = $items . $extra_text;
 	} else {
 		$rules = str_replace("\n", '\vspace{.375\baselineskip}\newline ', $bulletArray[0]);
-	}	
+	}
+	
+	$rules = preg_replace('/\*?\(([\S^\)][^\)]*[\S^\)])\)\*?/', '\emph{($1)}', $rules);
+	$rules = preg_replace('/(\\\emph\{[^\}]*[\.\,\:\;])\s+([TVWY][^\}]*\})/', '$1\hspace{0pt}$2', $rules);
+	$rules = preg_replace('/([^\n]+)(—\s*[^\n]+$)/', '\emph{$1}$2', $rules);
+	$rules = preg_replace('/(\\\item)\s*([TVWY])/', '$1\hspace{0em}$2', $rules);
+	$rules = preg_replace('/\s+([TVWY])/', '\hspace{-.125em} $1', $rules);
+	$rules = preg_replace('/(\w)\'(\w)/', '$1’$2', $rules);
+	
 	return trim($rules);
 }
 
@@ -530,7 +539,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   	
 	  if ($text && $flavor) {
 			if (stripos($text, '\item') !== false) {
-		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		    $buffer .= $text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
 		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
 			}
@@ -569,7 +578,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	
 	  if ($text && $flavor) {
 			if (stripos($text, '\item') !== false) {
-		    $buffer .= $shadow_text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		    $buffer .= $shadow_text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
 		    $buffer .= $shadow_text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
 			}
@@ -601,7 +610,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   	
 	  if ($text && $flavor) {
 			if (stripos($text, '\item') !== false) {
-		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		    $buffer .= $text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
 		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			}
@@ -634,7 +643,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	
 	  if ($text && $flavor) {
 			if (stripos($text, '\item') !== false) {
-		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		    $buffer .= $text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
 		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			}
