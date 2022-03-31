@@ -383,7 +383,10 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \newlength{\titlelength}
   \newlength{\manalength}
   \newlength{\rulesheight}
+	';
 	
+	if (($cardData['promo'] && $cardData['shadowText']) || (!$cardData['promo'])) {
+		$buffer .= '
   \begin{textblock*}{' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp}(' . (($cfg['title']['x'] * .10037 ) + $adjust_text[0]) . 'em, ' . (($cfg['title']['y'] * .10037 ) + $adjust_text[1]) . 'em)
   \fontsize{44pt}{44pt}
   \mana
@@ -397,20 +400,21 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \loop
   \fontsize{\count255 pt}{\count255 pt}
   \selectfont
-  \settowidth{\titlelength}{' . $name . '\strut}
+  \settowidth{\titlelength}{' . $name . '\vphantom{p’}}
   \addtolength{\titlelength}{\manalength}
-  \ifdim \titlelength >' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp
+  \ifdim \titlelength >' . ($cfg['manacost']['x'] - $cfg['title']['x'] - 4) . 'bp
   \advance \count255 by -1
   \repeat
-  
-  \ifnum\count255 >23
-  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}' . $name . '\phantom{’}
+	
+	\ifnum\count255 >23
+  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
   \end{' . $cfg['title']['align'] . '}
   \else
   \relax  
   \fi
 	\end{textblock*}
 	';
+	}
 	
 	if ($cardData['promo']) {
 	  $buffer .= '
@@ -427,14 +431,14 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	  \loop
 	  \fontsize{\count255 pt}{\count255 pt}
 	  \selectfont
-	  \settowidth{\titlelength}{' . $name . '\strut}
+	  \settowidth{\titlelength}{' . $name . '\vphantom{p’}}
 	  \addtolength{\titlelength}{\manalength}
-	  \ifdim \titlelength >' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp
+	  \ifdim \titlelength >' . ($cfg['manacost']['x'] - $cfg['title']['x'] - 4) . 'bp
 	  \advance \count255 by -1
 	  \repeat
   
 	  \ifnum\count255 >23
-	  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\color{offwhite}' . $name . '\phantom{’}
+	  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\color{offwhite}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
 	  \end{' . $cfg['title']['align'] . '}
 	  \else
 	  \relax  
@@ -465,7 +469,8 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   $buffer .= '\end{textblock*}
 	';
 	
-	$buffer .= '
+	if (($cardData['promo'] && $cardData['shadowText']) || (!$cardData['promo'])) {
+		$buffer .= '
   \begin{textblock*}{' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $cardData['setSymbolWidth']) . 'bp}(' . (($cfg['typeline']['x'] * .10037) + $adjust_text[0]) . 'em, ' . (($cfg['typeline']['y'] * .10037 ) + $adjust_text[1]) . 'em)
   \beleren
   \selectfont
@@ -473,13 +478,14 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \loop
   \fontsize{\the\dimexpr(\the\count255 pt)}{' . $cfg['typeline']['size'] . 'pt}
   \selectfont
-  \settowidth{\titlelength}{' . $types . '\strut}
+  \settowidth{\titlelength}{' . $types . '\vphantom{p’}}
   \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $sym) . 'bp
   \advance \count255 by -1
   \repeat
-	\color{black}' . $types . '\phantom{’}
+	\color{black}' . $types . '\vphantom{p’}
   \end{textblock*}
 	';
+	}
 	
 	if ($cardData['promo']) {
 		$buffer .= '
@@ -490,11 +496,11 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	  \loop
 	  \fontsize{\the\dimexpr(\the\count255 pt)}{' . $cfg['typeline']['size'] . 'pt}
 	  \selectfont
-	  \settowidth{\titlelength}{' . $types . '\strut}
+	  \settowidth{\titlelength}{' . $types . '\vphantom{p’}}
 	  \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $sym) . 'bp
 	  \advance \count255 by -1
 	  \repeat
-		\color{offwhite}' . $types . '\phantom{’}
+		\color{offwhite}' . $types . '\vphantom{p’}
 	  \end{textblock*}
 		';
 	}
@@ -506,76 +512,77 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	// % \includegraphics{' . $pwd . '/symbol/' . $cardData[$els[$fmt]['set']] . '_' . strtoupper($cardData[$els[$fmt]['rarity']])[0] . '.png} 
 	// %\end{textblock*}
 
+	if (!$cardData['promo'] || ($cardData['promo'] && $cardData['shadowText'])) {
+		$buffer .= '
+	  % Rules and Flavor Text
 	
-	$buffer .= '
-  % Rules and Flavor Text
+	  \begin{textblock*}{' . $cfg['textbox']['width'] . 'bp}[0, 0.5](' . (($cfg['textbox']['x'] * .10037 ) + $adjust_text[0]) . 'em, ' . (($cfg['textbox']['y'] * .10037 ) + $adjust_text[1] + ($cfg['textbox']['height'] / 2 * .10037)) . 'em)
 	
-  \begin{textblock*}{' . $cfg['textbox']['width'] . 'bp}[0, 0.5](' . (($cfg['textbox']['x'] * .10037 ) + $adjust_text[0]) . 'em, ' . (($cfg['textbox']['y'] * .10037 ) + $adjust_text[1] + ($cfg['textbox']['height'] / 2 * .10037)) . 'em)
-	
-  \count255 = ' . (array_key_exists('size', $cfg['textbox']) ? $cfg['textbox']['size'] : $cfg['defaults']['size']) . '
-  \plantin
-  \selectfont
-  \setstretch{0.97}
+	  \count255 = ' . (array_key_exists('size', $cfg['textbox']) ? $cfg['textbox']['size'] : $cfg['defaults']['size']) . '
+	  \plantin
+	  \selectfont
+	  \setstretch{0.97}
 
-  \loop
-  \fontsize{\count255 pt}{\count255 pt}
-  \selectfont
-  \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
+	  \loop
+	  \fontsize{\count255 pt}{\count255 pt}
+	  \selectfont
+	  \settototalheight{\rulesheight}{\parbox{' . $cfg['textbox']['width'] . 'bp}{\begin{flushleft}';
   	
-  if ($text && $flavor) {
-		if (stripos($text, '\item') !== false) {
-	    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
-		} else {
-	    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
-		}
-	} else if ($text && !$flavor) {
-		$buffer .= $text;
-  } else if (!$text && $flavor) {
-  	$buffer .= $flavor;
-  }
+	  if ($text && $flavor) {
+			if (stripos($text, '\item') !== false) {
+		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+			} else {
+		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+			}
+		} else if ($text && !$flavor) {
+			$buffer .= $text;
+	  } else if (!$text && $flavor) {
+	  	$buffer .= $flavor;
+	  }
   
-  $buffer .= '\relax
-  \end{flushleft}}}
-  \ifdim \rulesheight>' . $cfg['textbox']['height'] . 'bp
-  \advance \count255 by -1
-  \repeat
+	  $buffer .= '\relax
+	  \end{flushleft}}}
+	  \ifdim \rulesheight>' . $cfg['textbox']['height'] . 'bp
+	  \advance \count255 by -1
+	  \repeat
 
 	
-  \plantin
-  \selectfont
-	';
+	  \plantin
+	  \selectfont
+		';
 	
-	$textBegin = '\begin{flushleft}';
-	$textEnd   = '\end{flushleft}';
+		$textBegin = '\begin{flushleft}';
+		$textEnd   = '\end{flushleft}';
 	
-	if ($cfg['textbox']['align'] == "center") {
-	  $textBegin = '\begin{center}';
-		$textEnd   = '\end{center}';
-	}
-	
-  $buffer .= $textBegin . '\color{black}';
-	
-	if ($cardData['promo']) {
-		$shadow_text = convertToShadowText($text);
-	} else {
-		$shadow_text = $text;
-	}
-	
-  if ($text && $flavor) {
-		if (stripos($text, '\item') !== false) {
-	    $buffer .= $shadow_text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
-		} else {
-	    $buffer .= $shadow_text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+		if ($cfg['textbox']['align'] == "center") {
+		  $textBegin = '\begin{center}';
+			$textEnd   = '\end{center}';
 		}
-	} else if ($text && !$flavor) {
-		$buffer .= $shadow_text;
-  } else if (!$text && $flavor) {
-  	$buffer .= $flavor;
-  }
+	
+	  $buffer .= $textBegin . '\color{black}';
+	
+		if ($cardData['promo']) {
+			$shadow_text = convertToShadowText($text);
+		} else {
+			$shadow_text = $text;
+		}
+	
+	  if ($text && $flavor) {
+			if (stripos($text, '\item') !== false) {
+		    $buffer .= $shadow_text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+			} else {
+		    $buffer .= $shadow_text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+			}
+		} else if ($text && !$flavor) {
+			$buffer .= $shadow_text;
+	  } else if (!$text && $flavor) {
+	  	$buffer .= $flavor;
+	  }
   
-  $buffer .= $textEnd . '
-  \end{textblock*}
-  \setstretch{1.0}';
+	  $buffer .= $textEnd . '
+	  \end{textblock*}
+	  \setstretch{1.0}';
+	}
 		
 	if ($cardData['promo']) {
 		$buffer .= '
@@ -596,7 +603,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 			if (stripos($text, '\item') !== false) {
 		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
-		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			}
 		} else if ($text && !$flavor) {
 			$buffer .= $text;
@@ -627,9 +634,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	
 	  if ($text && $flavor) {
 			if (stripos($text, '\item') !== false) {
-		    $buffer .= $text . '\vspace{.9375em}' . $flavor;
+		    $buffer .= $text . '\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
-		    $buffer .= $text . '\vspace{.9375em}\newline ' . $flavor;		
+		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			}
 		} else if ($text && !$flavor) {
 			$buffer .= $text;

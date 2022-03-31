@@ -63,10 +63,10 @@
 	
   include("typesetting/latex.php");
   
-  $options = getopt("a:d:e:f:i:l:m:n:s:u:z:bchkprv", array("help", "for-sale", "logo"));
+  $options = getopt("a:d:e:f:i:l:m:n:s:t:u:x:z:bchkprv", array("help", "for-sale", "logo"));
   
   if (!$options || array_key_exists('h', $options) || array_key_exists('help', $options)) {
-	  die("usage: render.php <format> [<options>] <path>\n\nFormats:\n  -l\tLackeyBot JSON format\n  -m\tMTGJSON JSON format (Not finished)\n  -s\tScryfall JSON format (Not finished)\n\nOptions:\n  -a\tArtist override\n  -b\tBorderless promo frame\n  -c\tRemove copyright line\n  -d\tAdd text for designer field to each card\n  -e\tSet override\n  -h\tDisplays this usage description\n  -k\tKeep intermediate and temporary render files\n  -n\tRender a specific card or range of cards (using a hyphen)\n  -p\tOutput as print ready (With bleed area)\n  -r\tDon’t print reminder text\n  -v\tOutput as SVG instead of PDF (No flavor bar or graphics)\n  -z\tMax text size override (an integer, 18-38)\n\n");
+	  die("usage: render.php <format> [<options>] <path>\n\nFormats:\n  -l\tLackeyBot JSON format\n  -m\tMTGJSON JSON format (Not finished)\n  -s\tScryfall JSON format (Not finished)\n\nOptions:\n  -a\tArtist override\n  -b\tBorderless promo frame\n  -c\tRemove copyright line\n  -d\tAdd text for designer field to each card\n  -e\tSet override\n  -h\tDisplays this usage description\n  -k\tKeep intermediate and temporary render files\n  -n\tRender a specific card or range of cards (using a hyphen)\n  -p\tOutput as print ready (With bleed area)\n  -r\tDon’t print reminder text\n  -t\tShadow text on promo cards\n  -u\tCard number override\n-v  Output as SVG instead of PDF (No flavor bar or graphics)\n  -z\tMax text size override (an integer, 18-38)\n\n");
   }
 	
 	$pwd = exec('pwd');
@@ -189,6 +189,12 @@
 		
 		if (array_key_exists('r', $options)) {
 			$card[$elements[$format]['text']] = preg_replace('/\([^\)]+\)/', '', $card[$elements[$format]['text']]);
+		}
+		
+		if (array_key_exists('t', $options)) {
+			$card['shadowText'] = true;
+		} else {
+			$card['shadowText'] = false;
 		}
 		
 		if (array_key_exists('b', $options)) {
@@ -386,31 +392,47 @@
 		// echo "Exporting frame to PDF"
     // exec("inkscape -p \"$pwd/output/$thisFile.svg\" --export-pdf-version=1.4 --batch-process -o \"$pwd/output/$thisFile.pdf\" &>/dev/null");
     
-		echo "Exporting frame to PNG (800 DPI)\n";
-		exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 256 -o \"$pwd/output/$thisFile.png\" &>/dev/null");
+	  if (array_key_exists('x', $options)) {
+			echo "Exporting frame to PNG (1600 DPI)\n";
+			exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 512 -o \"$pwd/output/$thisFile.png\" &>/dev/null");
+		} else {
+			echo "Exporting frame to PNG (800 DPI)\n";
+			exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 256 -o \"$pwd/output/$thisFile.png\" &>/dev/null");
 		// echo "Exporting frame to PNG (300 DPI)\n";
     // exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 96 -o \"$pwd/output/$thisFile 300.png\" &>/dev/null");
+		}
 		
-	  if (!array_key_exists('v', $options)) {
-	    exec("convert -density 300 -geometry 1984 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt.png\"");
+		$density = 300;
+		$final_width = 1984;
+		$final_height = 2771;
+		
+	  if (array_key_exists('x', $options)) {
+			$density = 600;
+			$final_width = 3968;
+			$final_height = 5542;		
+		}
+		
+	  if (!array_key_exists('v', $options)) {			
+	    exec("convert -density $density -geometry $final_width -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt.png\"");
 	    // exec("convert -density 300 -geometry 744 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt 300.png\"");
 			
 			// If it’s PDF, we need to layer the PDF onto the SVG output
 			
-		  if (array_key_exists('p', $options)) {
-        $base  = imagecreatetruecolor(2176, 2960);
-				$compo = imagecreatetruecolor(1984, 2771);
+			if (array_key_exists('p', $options)) {
+	      $base  = imagecreatetruecolor($final_width + (($density / 3) * .92), (($density / 3) * .92));
+				$compo = imagecreatetruecolor($final_width, $final_height);
 			} else {
-        $base  = imagecreatetruecolor(1984, 2771);
-				$compo = imagecreatetruecolor(1984, 2771);
+        $base  = imagecreatetruecolor($final_width, $final_height);
+				$compo = imagecreatetruecolor($final_width, $final_height);
 			}
+			
       imagealphablending($compo, true);
       imagesavealpha($compo, true);
       $base  = imagecreatefrompng("$pwd/output/$thisFile.png");
       $compo = imagecreatefrompng("$pwd/output/{$thisFile}_txt.png");
 			
 		  if (array_key_exists('p', $options)) {
-				imagecopy($base, $compo, 100, 95, 0, 0, imagesx($compo), imagesy($compo));				
+				imagecopy($base, $compo, ($density / 3), (($density / 3) * .95), 0, 0, imagesx($compo), imagesy($compo));				
 			} else {
 				imagecopy($base, $compo, 0, 0, 0, 0, imagesx($compo), imagesy($compo));				
 			}
@@ -418,6 +440,7 @@
 			imagepng($base, "$pwd/output/$thisFile.png");
       imagedestroy($base);
 			
+			/*
 		  if (array_key_exists('p', $options)) {
         $base  = imagecreatetruecolor(816, 1110);
 				$compo = imagecreatetruecolor(744, 1039);
@@ -426,7 +449,6 @@
 				$compo = imagecreatetruecolor(744, 1039);
 			}
 			
-			/*
       imagealphablending($compo, true);
       imagesavealpha($compo, true);
       $base  = imagecreatefrompng("$pwd/output/$thisFile 300.png");
