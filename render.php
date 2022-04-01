@@ -253,7 +253,14 @@
 			$card[$elements[$format]['number']] = $options['u'];
 		}
 		
-    file_put_contents("$pwd/output/$thisFile.tex", createTeX($card, $format, $elements, $textcfg, $newSymbolWidth, $options));
+		$TeX = createTeX($card, $format, $elements, $textcfg, $newSymbolWidth, $options);
+
+		if (array_key_exists('v', $options)) {
+			//$TeX = preg_replace('/\\\includegraphics[^\}]+\}/', '\{\color{blue}·}', $TeX);
+		}
+		
+    file_put_contents("$pwd/output/$thisFile.tex", $TeX);
+		
         
     if ($format == 'Scryfall') {
 			$thisImage = "$pwd/art/" . $card[$elements[$format]['name']];
@@ -272,10 +279,11 @@
     
 	  if (array_key_exists('v', $options)) {
 		  // DVI to SVG export
-    	exec("xelatex -interaction=nonstopmode -halt-on-error -output-directory='$pwd/output' -output-driver='xdvipdfmx -z0' -no-pdf --shell-escape \"$thisFile.tex\" && dvisvgm -b papersize -T S0.75 -n -s \"$pwd/output/$thisFile.xdv\" > \"$pwd/output/{$thisFile}_txt.svg\"");
+    	exec("xelatex -interaction=nonstopmode -halt-on-error -output-directory='$pwd/output' -output-driver='xdvipdfmx -z0' -no-pdf --shell-escape \"$thisFile.tex\" && dvisvgm --libgs=LIBGS -b papersize -T S0.75 -n -s \"$pwd/output/$thisFile.xdv\" > \"$pwd/output/{$thisFile}_txt.svg\"");
 			$preparesvg = file_get_contents("$pwd/output/{$thisFile}_txt.svg");
 	    $preparesvg = str_replace("<?xml version='1.0' encoding='UTF-8'?>", "", $preparesvg);
 	    $preparesvg = str_lreplace("</svg>", "", file_get_contents("cards/$frameImage.svg")) . $preparesvg . "</svg>";
+			exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 256 -o \"$pwd/output/$thisFile.pdf\" &>/dev/null");
 		} else {
 			// PDF export
 			exec("xelatex -interaction=nonstopmode -halt-on-error -output-directory='$pwd/output' -output-driver='xdvipdfmx -z0' --shell-escape \"$pwd/output/$thisFile.tex\"");
@@ -373,7 +381,7 @@
 				$preparesvg = preg_replace('/mask="url\(#artmask\)"\/>\s*<\/g>/', 'mask="url(#artmask)"/><g transform="translate(37.5,35.5)">', $preparesvg);
 				$preparesvg = str_lreplace('</svg>', '</g></svg>', $preparesvg);
 			} else {
-		  	$preparesvg = str_replace('width="744" height="1039" viewBox="0 0 744 1039" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', 'width="816" height="1110" viewBox="0 0 816 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m 0h816v1110h-816z" fill="#000"/><g transform="translate(37.5,35.5)">', $preparesvg);
+		  	$preparesvg = str_replace('width="744" height="1039" viewBox="0 0 744 1039" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">', 'width="816" height="1110" viewBox="0 0 816 1110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="m0 0h816v1110h-816z"/><g transform="translate(37.5,35.5)">', $preparesvg);
 			}
 			$preparesvg = str_lreplace('</svg>', '</g></svg>', $preparesvg);
 
@@ -381,7 +389,7 @@
 		}
 		
 		if (array_key_exists('c', $options)) {
-			$preparesvg = str_replace('"translate(543,990)"', '"translate(543,970)"', $preparesvg);
+			$preparesvg = str_replace('"translate(543,990)"',  '"translate(543,970)"', $preparesvg);
 			$preparesvg = str_replace('"translate(543,1006)"', '"translate(543,986)"', $preparesvg);
 			$preparesvg = str_replace('"translate(543,1007)"', '"translate(543,986)"', $preparesvg);
 			$preparesvg = str_replace('"translate(543,1010)"', '"translate(543,990)"', $preparesvg);
@@ -389,8 +397,6 @@
 				
     file_put_contents("$pwd/output/$thisFile.svg", $preparesvg);
 		
-		// echo "Exporting frame to PDF"
-    // exec("inkscape -p \"$pwd/output/$thisFile.svg\" --export-pdf-version=1.4 --batch-process -o \"$pwd/output/$thisFile.pdf\" &>/dev/null");
     
 	  if (array_key_exists('x', $options)) {
 			echo "Exporting frame to PNG (1600 DPI)\n";
@@ -412,7 +418,7 @@
 			$final_height = 5542;		
 		}
 		
-	  if (!array_key_exists('v', $options)) {			
+	  if (!array_key_exists('v', $options)) {
 	    exec("convert -density $density -geometry $final_width -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt.png\"");
 	    // exec("convert -density 300 -geometry 744 -transparent white \"$pwd/output/{$thisFile}_txt.pdf\" \"$pwd/output/{$thisFile}_txt 300.png\"");
 			
@@ -463,6 +469,10 @@
 			imagepng($base, "$pwd/output/$thisFile 300.png");
       imagedestroy($base);
 			*/
+			  
+		} else {
+			echo "Exporting frame to PDF\n";
+	    exec("inkscape -p \"$pwd/output/$thisFile.svg\" --export-pdf-version=1.4 --batch-process -o \"$pwd/output/$thisFile.pdf\" &>/dev/null");
 		}
 		
 	  if (!array_key_exists('k', $options)) {
@@ -472,7 +482,7 @@
 			unlink("$pwd/output/{$thisFile}_txt.png");
 			unlink("$pwd/output/{$thisFile}.aux");
 			unlink("$pwd/output/{$thisFile}.log");
-			unlink("$pwd/output/{$thisFile}.svg");
+			//unlink("$pwd/output/{$thisFile}.svg");
 			unlink("$pwd/output/{$thisFile}.tex");
 			
 		}

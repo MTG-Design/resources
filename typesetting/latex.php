@@ -130,14 +130,13 @@ function substituteRules($rules)
 	$rules = preg_replace('/\n\s*\*\s+/', '•', trim($rules));	
 	$bulletArray = explode('•', $rules);
 	$extra_text = '';
-	
-	if (stripos(end($bulletArray), "\n") !== false) {
-		$last_item = explode("\n", end($bulletArray));
-		$bulletArray[count($bulletArray) -1] = $last_item[0];
-		$extra_text = $last_item[1];
-	}
-		
+			
 	if (count($bulletArray) > 1) {
+		if (stripos(end($bulletArray), "\n") !== false) {
+			$last_item = explode("\n", end($bulletArray));
+			$bulletArray[count($bulletArray) -1] = $last_item[0];
+			$extra_text = $last_item[1];
+		}
 		$bulletArray[0] = str_replace("\n", '\vspace{.375\baselineskip}\newline ', trim($bulletArray[0]));
 		$items = $bulletArray[0];
 		$items .= '\begin{itemize}[label=\textbullet,leftmargin=*,itemindent=0em,labelsep=0.3em,topsep=0.166666em,parsep=1.375em,partopsep=0em,itemsep=-1.1875em]';
@@ -256,7 +255,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   $cardData['setSymbolWidth'] = 40;
   
   if ($cfg['title']['align'] !== 'center') {
-    $cfg['title']['align'] = 'flushleft';
+    $cfg['title']['align'] = 'left';
   }
 	
 	$titleColor = 'black';
@@ -416,8 +415,8 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \repeat
 	
 	\ifnum\count255 >23
-  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
-  \end{' . $cfg['title']['align'] . '}
+  \begin{flush' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
+  \end{flush' . $cfg['title']['align'] . '}
   \else
   \relax  
   \fi
@@ -447,8 +446,8 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	  \repeat
   
 	  \ifnum\count255 >23
-	  \begin{' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\color{offwhite}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
-	  \end{' . $cfg['title']['align'] . '}
+	  \begin{flush' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\color{offwhite}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
+	  \end{flush' . $cfg['title']['align'] . '}
 	  \else
 	  \relax  
 	  \fi
@@ -462,8 +461,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	';
 	} else {
 		$buffer .= '\begin{textblock*}{' . $cfg['manacost']['width'] . 'bp}(' . $cfg['manacost']['x'] . 'bp, ' . $cfg['manacost']['y'] . 'bp)
-	\begin{flushleft}
-	';
+	\begin{flushleft}	';
 	}
 	
   $buffer .= '\color{black}' . $mana_tex . '\strut
@@ -541,7 +539,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 			if (stripos($text, '\item') !== false) {
 		    $buffer .= $text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
-		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+		    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
 			}
 		} else if ($text && !$flavor) {
 			$buffer .= $text;
@@ -580,7 +578,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 			if (stripos($text, '\item') !== false) {
 		    $buffer .= $shadow_text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
-		    $buffer .= $shadow_text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
+		    $buffer .= $shadow_text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;		
 			}
 		} else if ($text && !$flavor) {
 			$buffer .= $shadow_text;
@@ -612,7 +610,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 			if (stripos($text, '\item') !== false) {
 		    $buffer .= $text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
-		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			}
 		} else if ($text && !$flavor) {
 			$buffer .= $text;
@@ -645,7 +643,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 			if (stripos($text, '\item') !== false) {
 		    $buffer .= $text . '\vspace{-.375em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			} else {
-		    $buffer .= $text . '\\\\\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
+		    $buffer .= $text . '\newline\vspace{-.0625em}\includegraphics[scale=0.375]{' . $pwd . '/typesetting/flavorbar.png}\newline ' . $flavor;
 			}
 		} else if ($text && !$flavor) {
 			$buffer .= $text;
@@ -677,8 +675,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   '
   % Artist
   \begin{textblock*}{444bp}(' . $cfg['artist']['x'] . 'bp, ' . $cfg['artist']['y'] . 'bp)
-  \begin{flushleft}
-  \fontsize{22pt}{22pt}
+  \begin{flushleft}  \fontsize{22pt}{22pt}
   \mana
   \color{offwhite}
   \selectfont
@@ -720,8 +717,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	$buffer .= '
   % Collector’s Info
   \begin{textblock*}{360bp}(' . $cfg['cn']['x'] . 'bp, ' . $cfg['cn']['y'] . 'bp)
-  \begin{flushleft}
-  \fontsize{17pt}{20pt}
+  \begin{flushleft}  \fontsize{17pt}{20pt}
   \gotham
   \color{offwhite}
   \selectfont
@@ -733,8 +729,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   
   % Set Code and Language
   \begin{textblock*}{200bp}(' . $cfg['set']['x'] . 'bp, ' . $cfg['set']['y'] . 'bp)
-  \begin{flushleft}
-  \fontsize{17pt}{20pt}
+  \begin{flushleft}  \fontsize{17pt}{20pt}
   \gotham
   \color{offwhite}
   \addfontfeature{LetterSpace=8.0}
@@ -745,8 +740,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   
   % Rarity
   \begin{textblock*}{20bp}(' . $cfg['rarity']['x'] . 'bp, ' . $cfg['rarity']['y'] . 'bp)
-  \begin{flushleft}
-  \fontsize{17pt}{20pt}
+  \begin{flushleft}  \fontsize{17pt}{20pt}
   \gotham
   \color{offwhite}
   \selectfont
@@ -756,8 +750,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   
   % Not For Sale
   \begin{textblock*}{200bp}(' . $cfg['notforsale']['x'] . 'bp, ' . $cfg['notforsale']['y'] . 'bp)
-  \begin{flushleft}
-  \fontsize{17pt}{20pt}
+  \begin{flushleft}  \fontsize{17pt}{20pt}
   \gotham
   \color{offwhite}
   \selectfont
