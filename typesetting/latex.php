@@ -163,11 +163,11 @@ function substituteRules($rules)
 function substituteFlavor($flavor)
 {
 	$flavor = sanitizeText($flavor);
-	$flavor = preg_replace('/^(\*?[“\"”‘\'’TVWY])/', '\hspace+{-.125em}$1', $flavor);
-	$flavor = str_replace("\n", '\newline ', $flavor);
-	if (trim($flavor)) {
+	if (trim($flavor) && ($flavor[0] !== '*')) {
 		$flavor = '*' . $flavor . '*';
 	}
+	$flavor = preg_replace('/^(\*?[“\"”‘\'’TVWY])/', '\hspace+{-.125em}$1', $flavor);
+	$flavor = str_replace("\n", '\newline ', $flavor);
 	$flavor = preg_replace('/\*+([^\*]+)\*+/', '\emph{$1}', trim($flavor));
 	$flavor = preg_replace('/([\.\,\:\;])\s+([TVWY])/', '$1\hspace{0pt}$2', $flavor);
 	$flavor = preg_replace('/(\w)\'(\w)/', '$1’$2', $flavor);
@@ -249,7 +249,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 /*  if ($cardData['collector_total']) {
     $cnline = $cardData[$els[$fmt]['number'] . '\kern .25em/\kern .25em ' . $cardData[$els[$fmt]['collector_total'];
   } else {
-*/  $cnline = str_pad($cardData[$els[$fmt]['number']], 3, "0", STR_PAD_LEFT); // . '/\,361';
+*/  $cnline = str_pad($cardData[$els[$fmt]['number']], 3, "0", STR_PAD_LEFT) . '/\,256';
 //}
 
   $cardData['setSymbolWidth'] = 40;
@@ -286,7 +286,7 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 		$adjust_text = [ .3, .3 ];
 	}
 		
-  $buffer = '\documentclass{article}
+  $buffer = '\documentclass[dvisvgm]{article}
   \usepackage[absolute]{textpos}
   \usepackage{calc}
   \usepackage{xcolor}
@@ -385,14 +385,29 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	\newcommand{\alt}[1]{\begingroup\addfontfeature{RawFeature=+fina}#1\addfontfeature{RawFeature=-fina}\endgroup}
 	\newcommand{\noalt}[1]{\begingroup\addfontfeature{RawFeature=-fina}#1\addfontfeature{RawFeature=+fina}\endgroup}
   
+	\protected\def\fwrite#1{%
+	    \begingroup
+	        \count0=0 \loop \catcode\count0=12 \advance\count0 by1 \ifnum\count0<255\repeat
+	        \catcode`~=\active % use ~...~ for \...
+	        \def~##1~{\csname##1\endcsname}%
+	        \edef\~{\string~}% \'~~~\' for literal ~
+	        \fwriteA{#1}%
+	}
+	\def\fwriteA#1#2{\def\tmp##1#2{\immediate\write#1{##1}\endgroup}\tmp}
+	
 	\color{black}
 
   \begin{document}
   \newlength{\titlelength}
   \newlength{\manalength}
   \newlength{\rulesheight}
-	';
 	
+	\newwrite\f
+	\immediate\openout\f={' . $cardData[$els[$fmt]['name']] .'.json}
+	
+	\def\nameFontSize{\the\count255}
+	';
+		
 	if (($cardData['promo'] && $cardData['shadowText']) || (!$cardData['promo'])) {
 		$buffer .= '
   \begin{textblock*}{' . ($cfg['manacost']['x'] - $cfg['title']['x']) . 'bp}(' . (($cfg['title']['x'] * .10037 ) + $adjust_text[0]) . 'em, ' . (($cfg['title']['y'] * .10037 ) + $adjust_text[1]) . 'em)
@@ -413,6 +428,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \ifdim \titlelength >' . ($cfg['manacost']['x'] - $cfg['title']['x'] - 4) . 'bp
   \advance \count255 by -1
   \repeat
+	
+	\fwrite\f|{|
+	\fwrite\f|    "name_fontSize": ~nameFontSize~,|
 	
 	\ifnum\count255 >23
   \begin{flush' . $cfg['title']['align'] . '}\fontsize{\count255 pt}{\count255 pt}\raisebox{\the\dimexpr -22pt - (\count255 pt / 4)}[0pt][0pt]{' . $name . '\vphantom{p’}}
@@ -489,6 +507,10 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   \ifdim \titlelength >' . ($cfg['symbol']['x'] - $cfg['typeline']['x'] - $sym) . 'bp
   \advance \count255 by -1
   \repeat
+	
+	\def\typeFontSize{\the\count255}
+	\fwrite\f|    "type_fontSize": ~typeFontSize~,|
+	
 	\color{black}' . $types . '\vphantom{p’}
   \end{textblock*}
 	';
@@ -552,7 +574,9 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
 	  \ifdim \rulesheight>' . $cfg['textbox']['height'] . 'bp
 	  \advance \count255 by -1
 	  \repeat
-
+		
+		\def\textFontSize{\the\count255}
+		\fwrite\f|    "text_fontSize": ~textFontSize~,|
 	
 	  \plantin
 	  \selectfont
@@ -757,6 +781,10 @@ function createTeX($cardData, $fmt, $els, $cfg, $sym, $opt)
   Not For Sale\strut
   \end{flushleft}
   \end{textblock*}
+	
+	\fwrite\f|}|
+	\immediate\closeout\f
+	
   \end{document}';
   
   return $buffer;

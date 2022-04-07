@@ -279,7 +279,7 @@
     
 	  if (array_key_exists('v', $options)) {
 		  // DVI to SVG export
-    	exec("xelatex -interaction=nonstopmode -halt-on-error -output-directory='$pwd/output' -output-driver='xdvipdfmx -z0' -no-pdf --shell-escape \"$thisFile.tex\" && dvisvgm --libgs=LIBGS -b papersize -T S0.75 -n -s \"$pwd/output/$thisFile.xdv\" > \"$pwd/output/{$thisFile}_txt.svg\"");
+    	exec("xelatex -interaction=nonstopmode -halt-on-error -output-directory='$pwd/output' -output-driver='xdvipdfmx -z0' -no-pdf --shell-escape \"$thisFile.tex\" && dvisvgm -B png -b papersize -T S0.75 --no-fonts=1 -s \"$pwd/output/$thisFile.xdv\" > \"$pwd/output/{$thisFile}_txt.svg\"");
 			$preparesvg = file_get_contents("$pwd/output/{$thisFile}_txt.svg");
 	    $preparesvg = str_replace("<?xml version='1.0' encoding='UTF-8'?>", "", $preparesvg);
 	    $preparesvg = str_lreplace("</svg>", "", file_get_contents("cards/$frameImage.svg")) . $preparesvg . "</svg>";
@@ -408,14 +408,14 @@
     // exec("inkscape -p \"$pwd/output/$thisFile.svg\" --batch-process -d 96 -o \"$pwd/output/$thisFile 300.png\" &>/dev/null");
 		}
 		
-		$density = 300;
+		$density = 800;
 		$final_width = 1984;
 		$final_height = 2771;
 		
 	  if (array_key_exists('x', $options)) {
-			$density = 600;
-			$final_width = 3968;
-			$final_height = 5542;		
+			$density = $options['x'];
+			$final_width = int(2.48 * $options['x']);
+			$final_height = int(3.46375 * $options['x']);
 		}
 		
 	  if (!array_key_exists('v', $options)) {
@@ -425,7 +425,7 @@
 			// If it’s PDF, we need to layer the PDF onto the SVG output
 			
 			if (array_key_exists('p', $options)) {
-	      $base  = imagecreatetruecolor($final_width + (($density / 3) * .92), (($density / 3) * .92));
+	      $base  = imagecreatetruecolor($final_width + int($density * .24), $final_height + int($density * .24));
 				$compo = imagecreatetruecolor($final_width, $final_height);
 			} else {
         $base  = imagecreatetruecolor($final_width, $final_height);
@@ -478,13 +478,11 @@
 	  if (!array_key_exists('k', $options)) {
 			// unlink("$pwd/output/{$thisFile}_txt 300.png");
 			
-			unlink("$pwd/output/{$thisFile}_txt.pdf");
-			unlink("$pwd/output/{$thisFile}_txt.png");
-			unlink("$pwd/output/{$thisFile}.aux");
-			unlink("$pwd/output/{$thisFile}.log");
-			//unlink("$pwd/output/{$thisFile}.svg");
-			unlink("$pwd/output/{$thisFile}.tex");
-			
+			foreach (["_txt.pdf", "_txt.png", "_txt.svg", ".aux", ".log", ".tex", ".xdv"] as $tempext) {
+				if (file_exists("$pwd/output/$thisFile" . $tempext)) {
+					unlink("$pwd/output/$thisFile" . $tempext);
+				}
+			}			
 		}
 		
 		if ($early_abort) {
